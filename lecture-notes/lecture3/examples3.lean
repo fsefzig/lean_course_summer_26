@@ -105,27 +105,27 @@ def complete_induction (P : ℕ → Prop) : Prop :=
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
 
 lemma Q_zero_of_P_zero : P 0 → Q P 0 := by
-  intro hP0 m hm
-  rw[Nat.eq_zero_of_le_zero hm]
-  exact hP0
+  intro h n hn
+  rw [Nat.le_zero.mp hn]
+  exact h
 
 lemma P_n_of_Q_n (n : ℕ) : Q P n -> P n := by
-  intro hQ
-  exact hQ n (Nat.le_refl n)
+  unfold Q
+  intro hm
+  exact (hm n) <| Nat.le_refl n
 
 lemma Q_succ_of_Q_n_of_P_succ_of_Q_n (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
-  intro hPsucc hQ m hm
-  by_cases hmn : m ≤ n
-  · exact hQ m hmn
-  · have hmn' : m = n + 1 := by
-      push Not at hmn
-      exact Eq.symm (Nat.le_antisymm hmn hm)
-    rw[hmn']
-    exact hPsucc hQ
+  intro h₁ h₂ k hk
+  cases Nat.le_iff_lt_or_eq.mp hk with
+  | inl hlt =>
+    exact h₂ k <| Nat.le_iff_lt_add_one.mpr hlt
+  | inr heq =>
+    rw [heq]
+    exact h₁ h₂
 
 lemma P_of_Q : (∀ n, Q P n) -> ∀ n, P (n) := by
-  intro hQ n
-  exact P_n_of_Q_n P n (hQ n)
+  intro h n
+  exact (P_n_of_Q_n P n) <| h n
 
 theorem induction_implies_complete_induction : complete_induction P := by
   intro ⟨hP0, hQP⟩
