@@ -7,12 +7,24 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
-
+  classical
+  constructor
+  · intro h
+    by_cases hp : P
+    · right
+      intro hq
+      exact h ⟨hp, hq⟩
+    · left
+      exact hp
+  · intro h hpq
+    rcases h with hp | hq
+    · exact hp hpq.1
+    · exact hq hpq.2
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
-
+  rcases h with hP | hQ
+  · exact False.elim (hp hP)
+  · exact hQ
 end
 
 section -- Quantifiers
@@ -26,7 +38,7 @@ is a function that takes an arbitrary element x of type T and returns a proof of
 Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proof of P x.
 -/
 
-theorem exercise3 (h : ∀ x, P x ) (x : T) : P x := by
+theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
 
 
@@ -39,7 +51,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
@@ -49,19 +62,30 @@ where x : T and h : P x.
 We can use the 'use x' tactic to prove an existentially quantified statement by providing a witness
 x : T and changing the goal to P x.
 -/
-
-theorem exercise5 (h: ∀ x, P x) : ∃ y, P y := by
-  sorry
+include y₀ in
+theorem exercise5 (h : ∀ x, P x) : ∃ y, P y := by
+  use y₀
+  exact h y₀
 
 
 /-
 Finally, to use a hypothesis h : ∃ x, P x, we can use the 'rcases' tactic to obtain
 a witness x : T and a proof h' : P x.
 -/
-
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
+  use k * k  -- complete the proof from here, remember the natural number game.
+  calc
+    n * n = (2 * k) * (2 * k) := by rw [hk]
+    _ = 2 * (k * (2 * k)) := by rw [Nat.mul_assoc]
+    _ = 2 * (2 * (k * k)) := by
+      rw [Nat.mul_left_comm k 2 k]
+    _ = (2 * 2) * (k * k) := by
+      rw [← Nat.mul_assoc]
+    _ = 4 * (k * k) := by rfl
 
 
 end
+
+
+#eval IO.println "Sheet 1 compiled"
