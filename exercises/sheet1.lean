@@ -17,7 +17,7 @@ end
 
 section -- Quantifiers
 
-variable {T : Type} {y₀ : T} {P : T → Prop}
+variable {T : Type} {P : T → Prop}
 
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
@@ -26,7 +26,7 @@ is a function that takes an arbitrary element x of type T and returns a proof of
 Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proof of P x.
 -/
 
-theorem exercise3 (h : ∀ x, P x ) (x : T) : P x := by
+theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
 
 
@@ -50,7 +50,7 @@ We can use the 'use x' tactic to prove an existentially quantified statement by 
 x : T and changing the goal to P x.
 -/
 
-theorem exercise5 (h: ∀ x, P x) : ∃ y, P y := by
+theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
   sorry
 
 
