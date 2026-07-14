@@ -7,6 +7,8 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
+  constructor
+  · sorry
   sorry
 
 
