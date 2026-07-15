@@ -1,17 +1,36 @@
 import Std
 
 import Mathlib.Tactic.Use
-
+import Mathlib.Tactic.ApplyAt
 section
 
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    by_cases hp : P
+    · right
+      intro hq
+      have h_and : P∧Q := ⟨hp, hq⟩
+      exact h h_and
+    · left
+      exact hp
+  · intro h h1
+    cases h with
+    |inl hP =>
+      exact hP h1.left
+    |inr hQ =>
+      exact hQ h1.right
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  cases h with
+  |inl hnP =>
+    contradiction
+  |inr hq =>
+    exact hq
+
 
 end
 
@@ -36,10 +55,10 @@ we can use the 'intro' tactic to introduce an element x of type T and change the
 -/
 
 theorem theorem_we_want_to_use (x : T) : P x := by
-  sorry -- use this theorem to prove exercise4
-
-theorem exercise4 : ∀ x, P x := by
   sorry
+theorem exercise4 : ∀ x, P x := by
+  intro x
+  apply theorem_we_want_to_use
 
 
 /-
@@ -51,7 +70,11 @@ x : T and changing the goal to P x.
 -/
 
 theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+  use y
+  exact h y
+
+
+
 
 
 /-
@@ -61,7 +84,6 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
-
-
+  use k*k -- complete the proof from here, remember the natural number game.
+  rw[hk,Nat.mul_assoc, ←Nat.mul_assoc k, Nat.mul_comm k, Nat.mul_assoc, ←Nat.mul_assoc]
 end
