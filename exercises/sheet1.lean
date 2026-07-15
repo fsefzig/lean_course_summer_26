@@ -7,17 +7,24 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    exact (Classical.em P).elim
+      (fun hp => Or.inr (fun hq => h ⟨hp, hq⟩))
+      (fun hp => Or.inl hp)
+  · intro h hpq
+    exact h.elim (fun hp => hp hpq.1) (fun hq => hq hpq.2)
+
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  exact h.elim (fun p => absurd p hp) (fun q => q)
 
 end
 
 section -- Quantifiers
 
-variable {T : Type} {P : T → Prop}
+variable {T : Type} {y₀ : T} {P : T → Prop}
 
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
@@ -39,7 +46,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
@@ -49,9 +57,11 @@ where x : T and h : P x.
 We can use the 'use x' tactic to prove an existentially quantified statement by providing a witness
 x : T and changing the goal to P x.
 -/
+include y₀ in
+theorem exercise5 (h : ∀ x, P x) : ∃ y, P y := by
+  use y₀
+  exact h y₀
 
-theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
 
 
 /-
@@ -61,7 +71,14 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
-
+  use k * k
+  rw [hk]
+  calc 2 * k * (2 * k)
+      = 2 * (k * (2 * k)) := by rw [Nat.mul_assoc]
+    _ = 2 * (k * 2 * k)   := by rw [← Nat.mul_assoc k 2 k]
+    _ = 2 * (2 * k * k)   := by rw [Nat.mul_comm k 2]
+    _ = 2 * (2 * (k * k)) := by rw [Nat.mul_assoc 2 k k]
+    _ = 2 * 2 * (k * k)   := by rw [← Nat.mul_assoc]
+    _ = 4 * (k * k)       := rfl
 
 end
