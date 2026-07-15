@@ -7,17 +7,38 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    by_cases hp : P
+    · by_cases hq : Q
+      · exfalso
+        exact h ⟨hp, hq⟩
+      · right
+        exact hq
+    · left
+      exact hp
+  · intro h2
+    cases h2 with
+    | inl h2p =>
+        intro hpq
+        exact h2p hpq.left
+    | inr h2q =>
+        intro hpq
+        exact h2q hpq.right
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
-
+  cases h with
+  | inl h2p =>
+    exfalso
+    exact hp h2p
+  | inr hq =>
+    exact hq
 end
 
 section -- Quantifiers
 
-variable {T : Type} {P : T → Prop}
+variable {T : Type} {y₀ : T} {P : T → Prop}
 
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
@@ -28,8 +49,6 @@ Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proo
 
 theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
-
-
 /-
 Whenever we want to prove a universally quantified statement ∀ x, P x,
 we can use the 'intro' tactic to introduce an element x of type T and change the goal to P x.
@@ -39,8 +58,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
-
+  intro x
+  exact theorem_we_want_to_use x
 
 /-
 Recall a proof of an existentially quantified statement ∃ x, P x
@@ -51,7 +70,8 @@ x : T and changing the goal to P x.
 -/
 
 theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+  use y
+  exact h y
 
 
 /-
@@ -61,7 +81,7 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
-
-
+  use k * k
+  rw [hk]
+  sorry -- i dont know lol
 end

@@ -9,8 +9,8 @@ import Std
 -- Example 1
 theorem example1 (n : Nat) : n * Nat.succ 0 = n := by
   rw [Nat.mul_succ]
-  rw[Nat.mul_zero]
-  sorry
+  rw [Nat.mul_zero]
+  exact Nat.zero_add n
 
 -- Example 2
 theorem example2 (n : Nat) : 0 + n = n := by
@@ -24,7 +24,7 @@ theorem example2 (n : Nat) : 0 + n = n := by
 -- Example 1 - finished
 theorem example1' (n : Nat) : n * Nat.succ 0 = n := by
   rw [Nat.mul_succ]
-  rw[Nat.mul_zero]
+  rw [Nat.mul_zero]
   exact example2 n
 
 -- Example 3
