@@ -1,10 +1,16 @@
 import Std
 
+#check Nat.succ_add
+
 #check Nat.add_zero
+
+#check Nat.add_succ
 
 #check Nat.mul_succ
 
 #check Nat.mul_zero
+
+#check Nat.zero_add
 
 -- Example 1
 theorem example1 (n : Nat) : n * Nat.succ 0 = n := by

@@ -7,13 +7,73 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
 
+  by_cases p : P <;> by_cases q : Q
+
+  constructor
+  intro a
+  exfalso
+  apply a
+  constructor
+  exact p
+  exact q
+
+  intro b
+  exfalso
+  cases b with
+  | inl bp =>
+    apply bp
+    exact p
+  | inr bq =>
+    apply bq
+    exact q
+
+  constructor
+  intro c
+  right
+  exact q
+
+  intros d e
+  apply q
+  cases e with
+  | intro ep eq =>
+    exact eq
+
+  constructor
+  intro f
+  left
+  exact p
+
+  intros g h
+  apply p
+  cases h with
+  | intro hp hq =>
+    exact hp
+
+  constructor
+  intro i
+  left
+  exact p
+
+  intros j k
+  apply p
+  cases k with
+  | intro kp kq =>
+    exact kp
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
 
-end
+
+  cases h with
+    | inl ph =>
+      exfalso
+      apply hp
+      exact ph
+
+    | inr hq =>
+      exact hq
+
+  end
 
 section -- Quantifiers
 
@@ -29,7 +89,6 @@ Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proo
 theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
 
-
 /-
 Whenever we want to prove a universally quantified statement ∀ x, P x,
 we can use the 'intro' tactic to introduce an element x of type T and change the goal to P x.
@@ -39,8 +98,9 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
 
+  intro a
+  apply theorem_we_want_to_use
 
 /-
 Recall a proof of an existentially quantified statement ∃ x, P x
@@ -51,7 +111,9 @@ x : T and changing the goal to P x.
 -/
 
 theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+
+  use y
+  apply theorem_we_want_to_use
 
 
 /-
@@ -61,7 +123,11 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
-
+  use k*k
+  rw [hk]
+  rw [Nat.mul_assoc]
+  rw [Nat.mul_comm k]
+  rw [Nat.mul_assoc]
+  rw [← Nat.mul_assoc]
 
 end

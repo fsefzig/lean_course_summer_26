@@ -102,9 +102,9 @@ theorem double_negation : ¬ ¬ P ↔ P := by
 -- Contrapostion
 
 theorem contraposition (h : P → Q) : ¬ Q → ¬ P := by
-  intro hq
-  exact example4' h hq
-
+  intros hq hp
+  apply hq
+  exact h hp
 
 theorem contraposition' (h : P → Q) : ¬ Q → ¬ P :=
   fun hq hp => hq (h hp)
