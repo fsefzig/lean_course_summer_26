@@ -1,7 +1,8 @@
 import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Data.Finset.Range
 import Mathlib.Data.Fin.Basic
-
+import Mathlib.Data.Rat.Init
+import Mathlib.Data.Rat.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 
@@ -29,7 +30,7 @@ theorem example1 (hn : d ∣ n) (hm : d ∣ m) : d ∣ n + m := by
 theorem example3 (h : n > 1) : n * n > n := by
   exact Nat.lt_mul_self_iff.mpr h
 
-theorem example2 (hp : p.Prime) : ¬ ((p * p).Prime) := by
+theorem example4 (hp : p.Prime) : ¬ ((p * p).Prime) := by
   have hpneq1 : p ≠ 1 := by
     exact Nat.Prime.ne_one hp
   have h : p ≠ p * p := by
@@ -47,7 +48,7 @@ end
 
 section -- Proof by Induction
 
-variable {n : ℕ}
+variable (n : ℕ)
 
 #check Finset.range n -- The set of natural numbers {0, 1, 2, ..., n-1}, has type Finset ℕ.
 
@@ -77,6 +78,22 @@ The refine tactic allows you to apply a theorem or lemma to the goal, even if th
 theorem has additional hypotheses that are not yet satisfied.
 The tactic creates goals for all hypotheses left out by ?_.
 -/
+
+#check (n : ℚ)
+
+theorem Gauss_sum' (n : ℕ) : ∑ i ∈ Finset.range (n + 1) , i  = (n * (n + 1) / 2 : ℚ) := by
+  sorry
+
+/-
+We have to decide if we want to prove the theorem in ℕ or in ℚ.
+The types ℕ and ℚ are different, so we have to be aware of the meaning of the symbolds
+in each of those contexts.
+Below is a sneak peak for next week, when we will talk about sets/subtypes. In particular,
+the above theorem implies that n * (n + 1)/2 ∈ NatinRat.
+-/
+
+def NatinRat := {q : ℚ // ∃ n : ℕ, q = (n : ℚ)}
+
 end
 
 section -- Complete Induction
@@ -86,16 +103,16 @@ def complete_induction : Prop :=  (P 0 ∧ (∀ n, (∀ m, m ≤ n → P m) → 
 
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
 
-lemma lemma0 : P 0 → Q P 0 := by
+lemma Q_zero_of_P_zero : P 0 → Q P 0 := by
   sorry
 
-lemma lemma1 (n : ℕ) : Q P n -> P n := by
+lemma P_n_of_Q_n (n : ℕ) : Q P n -> P n := by
   sorry
 
-lemma lemma2 (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
+lemma Q_succ_of_Q_n_of_P_succ_of_Q_n (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
   sorry
 
-lemma lemma3 : (∀ n, Q P n) -> ∀ n, P (n) := by
+lemma P_of_Q : (∀ n, Q P n) -> ∀ n, P (n) := by
   sorry
 
 theorem induction_implies_complete_induction : complete_induction P := by
@@ -104,9 +121,9 @@ theorem induction_implies_complete_induction : complete_induction P := by
     intro n
     induction n with
     | zero =>
-        exact lemma0 P hP0
+        exact Q_zero_of_P_zero P hP0
     | succ n ih =>
-        exact lemma2 P n (hQP n) ih
+        exact Q_succ_of_Q_n_of_P_succ_of_Q_n P n (hQP n) ih
   intro n
-  exact lemma3 P hQall n
+  exact P_of_Q P hQall n
 end
