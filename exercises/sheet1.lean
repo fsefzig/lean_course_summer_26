@@ -84,3 +84,15 @@ theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   use k*k
 
 end
+
+variable {P Q R : Prop}
+
+theorem practice13 (h : P → (Q → R)) : (P ∧ Q) → R := by
+  intro hpq
+  exact h hpq.left hpq.right
+
+theorem practice13' (h : P → (Q → R)) : (P ∧ Q) → R := by
+  intro hpq
+  cases hpq with
+  | intro hp hq =>
+    exact h hp hq
