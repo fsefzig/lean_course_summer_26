@@ -1,7 +1,8 @@
 import Mathlib.Data.Nat.Prime.Defs
 import Mathlib.Data.Finset.Range
 import Mathlib.Data.Fin.Basic
-
+import Mathlib.Data.Rat.Init
+import Mathlib.Data.Rat.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 
@@ -29,7 +30,7 @@ theorem example1 (hn : d ∣ n) (hm : d ∣ m) : d ∣ n + m := by
 theorem example3 (h : n > 1) : n * n > n := by
   exact Nat.lt_mul_self_iff.mpr h
 
-theorem example2 (hp : p.Prime) : ¬ ((p * p).Prime) := by
+theorem example4 (hp : p.Prime) : ¬ ((p * p).Prime) := by
   have hpneq1 : p ≠ 1 := by
     exact Nat.Prime.ne_one hp
   have h : p ≠ p * p := by
@@ -47,7 +48,7 @@ end
 
 section -- Proof by Induction
 
-variable {n : ℕ}
+variable (n : ℕ)
 
 #check Finset.range n -- The set of natural numbers {0, 1, 2, ..., n-1}, has type Finset ℕ.
 
@@ -77,6 +78,22 @@ The refine tactic allows you to apply a theorem or lemma to the goal, even if th
 theorem has additional hypotheses that are not yet satisfied.
 The tactic creates goals for all hypotheses left out by ?_.
 -/
+
+#check (n : ℚ)
+
+theorem Gauss_sum' (n : ℕ) : ∑ i ∈ Finset.range (n + 1) , i  = (n * (n + 1) / 2 : ℚ) := by
+  sorry
+
+/-
+We have to decide if we want to prove the theorem in ℕ or in ℚ.
+The types ℕ and ℚ are different, so we have to be aware of the meaning of the symbolds
+in each of those contexts.
+Below is a sneak peak for next week, when we will talk about sets/subtypes. In particular,
+the above theorem implies that n * (n + 1)/2 ∈ NatinRat.
+-/
+
+def NatinRat := {q : ℚ // ∃ n : ℕ, q = (n : ℚ)}
+
 end
 
 section -- Complete Induction
