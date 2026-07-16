@@ -7,17 +7,37 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
-
+  constructor
+  · intro h
+    by_cases hp : P
+    · --P is true, so Q must be false
+      right
+      intro hq
+      exact h ⟨hp, hq⟩
+    · --P is false
+      left
+      exact hp
+  · intro h
+    cases h with
+    | inl hp =>
+        intro hpq
+        exact hp hpq.left
+    | inr hq =>
+        intro hpq
+        exact hq hpq.right
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  cases h with
+  | inl hP =>
+      contradiction
+  | inr hQ =>
+      exact hQ
 
 end
 
 section -- Quantifiers
 
-variable {T : Type} {P : T → Prop}
+variable {T : Type} {y₀ : T} {P : T → Prop}
 
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
@@ -29,7 +49,6 @@ Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proo
 theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
 
-
 /-
 Whenever we want to prove a universally quantified statement ∀ x, P x,
 we can use the 'intro' tactic to introduce an element x of type T and change the goal to P x.
@@ -39,8 +58,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
-
+  intro x
+  exact theorem_we_want_to_use x
 
 /-
 Recall a proof of an existentially quantified statement ∃ x, P x
@@ -50,10 +69,9 @@ We can use the 'use x' tactic to prove an existentially quantified statement by 
 x : T and changing the goal to P x.
 -/
 
-theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
-
-
+theorem exercise5 (h: ∀ x, P x) : ∃ y, P y := by
+  use x
+  exact h x
 /-
 Finally, to use a hypothesis h : ∃ x, P x, we can use the 'rcases' tactic to obtain
 a witness x : T and a proof h' : P x.
@@ -61,7 +79,12 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
-
+  rw[hk]
+  use k*k
+  rw[Nat.mul_assoc]
+  rw[Nat.mul_comm (k) (2*k)]
+  rw[Nat.mul_assoc]
+  rw[← Nat.mul_assoc]
 
 end
+>>>>>>> Stashed changes
