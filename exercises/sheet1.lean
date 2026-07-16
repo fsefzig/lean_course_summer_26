@@ -6,12 +6,41 @@ section
 
 variable {P Q : Prop}
 
+
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    by_cases hq : Q
+    · left
+      intro hp
+      have hpq : P ∧ Q := ⟨hp, hq⟩
+      exact h hpq
+    · right
+      exact hq
+  --now, show the <= that    (¬ P ∨ ¬ Q) => (¬(P ∧ Q))
+  intro h
+  cases h with
+  | inl hnp=>
+    intro hpq
+    cases hpq with
+    | intro hp hq
+    exact hnp hp
+  | inr hnq=>
+    intro hpq
+    cases hpq with
+    | intro hp hq
+    exact hnq hq
+
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  cases h with
+  | inl hP =>
+      contradiction
+  | inr hq =>
+      exact hq
+
+
 
 end
 
@@ -39,7 +68,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
@@ -51,7 +81,8 @@ x : T and changing the goal to P x.
 -/
 
 theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+  use y
+  exact h y
 
 
 /-
@@ -59,9 +90,12 @@ Finally, to use a hypothesis h : ∃ x, P x, we can use the 'rcases' tactic to o
 a witness x : T and a proof h' : P x.
 -/
 
+--note that i got help on the exercise, the final line written did not come from me
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
+  use k*k
+  rw [hk]
+  rw [Nat.mul_assoc, Nat.mul_comm k (2 * k), Nat.mul_assoc, ← Nat.mul_assoc]
 
 
 end
