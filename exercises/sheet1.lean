@@ -59,7 +59,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  exact theorem_we_want_to_use
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
