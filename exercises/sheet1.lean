@@ -7,17 +7,31 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    by_cases hp : P
+    · by_cases hq : Q
+      ·  exact False.elim (h ⟨hp, hq⟩)
+      ·  exact Or.inr hq
+    · exact Or.inl hp
+  · intro h hpq
+    cases hpq with
+    | intro hp hq =>
+      cases h with
+      | inl hnp => exact hnp hp
+      | inr hnq => exact hnq hq
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  cases h with
+  | inr hq => exact hq
+  | inl hP => exact False.elim (hp hP)
 
 end
 
 section -- Quantifiers
 
-variable {T : Type} {P : T → Prop}
+variable {T : Type} {y₀ : T} {P : T → Prop}
 
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
@@ -39,7 +53,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
@@ -50,8 +65,9 @@ We can use the 'use x' tactic to prove an existentially quantified statement by 
 x : T and changing the goal to P x.
 -/
 
-theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+theorem exercise5 (y₀ : T) (h : ∀ x, P x) : ∃ y, P y := by
+  use y₀
+  exact h y₀
 
 
 /-
@@ -61,7 +77,14 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
+  use k * k
+  rw [hk]
+  rw [Nat.mul_assoc]
+  rw [← Nat.mul_assoc k 2 k]
+  rw [Nat.mul_comm k 2]
+  rw [← Nat.mul_assoc]
+  rw [← Nat.mul_assoc]
+  rw [Nat.mul_assoc]
 
 
 end
