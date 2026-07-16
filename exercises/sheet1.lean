@@ -7,11 +7,38 @@ section
 variable {P Q : Prop}
 
 theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
-  sorry
+  constructor
+  · intro h
+    --I believe you have to use an import for by_contra but I'm not sure if I should do so since the exercise sheet did not originally include it
+    by_cases hp : P
+    · right
+      intro hq
+      apply h
+      exact ⟨hp, hq⟩
+    · left
+      exact hp
+  · intro h_or
+    intro h_and
+    cases h_and with
+    | intro hp hq =>
+      cases h_or with
+      | inl hnot_P => exact hnot_P hp
+      | inr hnot_Q => exact hnot_Q hq
+
+
+
+
+
+
 
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  sorry
+  cases h with --we must do proof by cases
+  | inl hP => --case one where we assume P is true, named hP
+    exfalso --exposes the contradiction where P cannot be true and false at the same time
+    exact hp hP
+  | inr hQ => --assumes Q is true, named hQ
+  exact hQ
 
 end
 
@@ -39,7 +66,8 @@ theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
-  sorry
+  intro x
+  exact theorem_we_want_to_use x
 
 
 /-
@@ -51,7 +79,8 @@ x : T and changing the goal to P x.
 -/
 
 theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
-  sorry
+  use y
+  exact h y
 
 
 /-
@@ -61,7 +90,13 @@ a witness x : T and a proof h' : P x.
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
-  sorry -- complete the proof from here, remember the natural number game.
+  rw[hk]
+  use k * k
+  rw[Nat.mul_assoc]
+  rw[Nat.mul_comm k]
+  rw[Nat.mul_assoc]
+  rw[Nat.mul_assoc 2 2]
+
 
 
 end
