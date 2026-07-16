@@ -96,11 +96,6 @@ def NatinRat := {q : ℚ // ∃ n : ℕ, q = (n : ℚ)}
 
 end
 
-example (q : ℚ) (h : ∃ n : ℕ, q = (n : ℚ)) :
-    ∃ n : ℕ, (n : ℚ) = q := by
-  obtain ⟨n, hn⟩ := h
-  exact ⟨n, hn.symm⟩
-
 section -- Complete Induction
 variable (P : ℕ → Prop)
 

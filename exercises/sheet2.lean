@@ -43,7 +43,7 @@ variable {I : Finset α} {f : α → ℕ}
 
 
 -- Use what we learned to prove the following theorem.
-theorem exercise5 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
+theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
   sorry
 end
 
