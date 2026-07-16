@@ -86,16 +86,16 @@ def complete_induction : Prop :=  (P 0 ∧ (∀ n, (∀ m, m ≤ n → P m) → 
 
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
 
-lemma lemma0 : P 0 → Q P 0 := by
+lemma Q_zero_of_P_zero : P 0 → Q P 0 := by
   sorry
 
-lemma lemma1 (n : ℕ) : Q P n -> P n := by
+lemma P_n_of_Q_n (n : ℕ) : Q P n -> P n := by
   sorry
 
-lemma lemma2 (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
+lemma Q_succ_of_Q_n_of_P_succ_of_Q_n (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
   sorry
 
-lemma lemma3 : (∀ n, Q P n) -> ∀ n, P (n) := by
+lemma P_of_Q : (∀ n, Q P n) -> ∀ n, P (n) := by
   sorry
 
 theorem induction_implies_complete_induction : complete_induction P := by
@@ -104,9 +104,9 @@ theorem induction_implies_complete_induction : complete_induction P := by
     intro n
     induction n with
     | zero =>
-        exact lemma0 P hP0
+        exact Q_zero_of_P_zero P hP0
     | succ n ih =>
-        exact lemma2 P n (hQP n) ih
+        exact Q_succ_of_Q_n_of_P_succ_of_Q_n P n (hQP n) ih
   intro n
-  exact lemma3 P hQall n
+  exact P_of_Q P hQall n
 end
