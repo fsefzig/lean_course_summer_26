@@ -39,8 +39,6 @@ lemma lemma1 {d n : ℕ} (hn : n ≠ 0) (hd : d ∣ n) : d ≤ n := by
   refine Nat.le_mul_of_pos_right d ?_
   have hr := h.right
   exact Nat.zero_lt_of_ne_zero hr
-lemma contraposition (P Q : Prop) (h : P → Q) : ¬ Q → ¬ P :=
-  fun hq hp => hq (h hp)
 
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
   intro n
