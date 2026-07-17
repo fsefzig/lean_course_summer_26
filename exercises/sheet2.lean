@@ -64,33 +64,24 @@ theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := 
   push Not at hp
   rcases hp with ⟨n, hn⟩
   let N := n.factorial + 1
-  by_cases N_prime : Nat.Prime N
-  case pos =>
-    have hN : n < N := by
-      unfold N
-      have hN2 := Nat.self_le_factorial
-      apply Order.lt_add_one_iff.mpr (hN2 n)
-    apply hn at N_prime
-    exact (Nat.not_lt_of_ge N_prime) hN
-  case neg =>
-    have hN' : 1 ≠  N := by
-      unfold N
-      by_contra hN1
-      nth_rewrite 1 [← Nat.zero_add 1] at hN1
-      apply Nat.add_right_cancel at hN1
+  have hN' : 1 ≠  N := by
+    unfold N
+    by_contra hN1
+    nth_rewrite 1 [← Nat.zero_add 1] at hN1
+    apply Nat.add_right_cancel at hN1
 
-      exact (Nat.ne_of_gt (Nat.factorial_pos n)) hN1.symm
-    rcases Nat.exists_prime_and_dvd hN'.symm with ⟨p, hp_prime, hp_dvd_N⟩
-    have hp_le : p ≤ n := hn p hp_prime
-    have hp_le_fac : p ∣ n.factorial := by
-      exact Nat.dvd_factorial (Nat.Prime.pos hp_prime) hp_le
-    unfold N at hp_dvd_N
+    exact (Nat.ne_of_gt (Nat.factorial_pos n)) hN1.symm
+  rcases Nat.exists_prime_and_dvd hN'.symm with ⟨p, hp_prime, hp_dvd_N⟩
+  have hp_le : p ≤ n := hn p hp_prime
+  have hp_le_fac : p ∣ n.factorial := by
+    exact Nat.dvd_factorial (Nat.Prime.pos hp_prime) hp_le
+  unfold N at hp_dvd_N
 
-    have hp_not_dvd : ¬ (p ∣ n.factorial + 1) := by
-      apply exercise1
-      · exact Nat.Prime.ne_one hp_prime
-      · exact hp_le_fac
-    contradiction
+  have hp_not_dvd : ¬ (p ∣ n.factorial + 1) := by
+    apply exercise1
+    · exact Nat.Prime.ne_one hp_prime
+    · exact hp_le_fac
+  contradiction
 end
 
 section -- Finsets
