@@ -14,17 +14,13 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 section -- More on divisiblity
 
 theorem exercise0 {d k n : ℕ} (hn : n ≠ 0) (hd : d ≠ 1) (h : n = d * k) : k < n := by
-  have hk : k ≠ 0 := by
-    intro hk
-    rw[hk, Nat.mul_zero] at h
-    exact hn h
   have hdneq : d ≠ 0 := by
     intro hd
     rw[hd, Nat.zero_mul] at h
     exact hn h
-  by_contra! hkn
+  by_contra! hk_leq_n
   have hmul : d * n ≤ d * k := by
-    exact Nat.mul_le_mul_left d hkn
+    exact Nat.mul_le_mul_left d hk_leq_n
   rw[← h] at hmul
   have hnemul : ¬ (d * n ≤ n) := by
     push Not
@@ -41,29 +37,17 @@ theorem exercise1 {d n : ℕ} (hd : d ≠ 1) (h : d ∣ n) : ¬ (d ∣ n + 1):= 
   apply Nat.eq_one_of_dvd_one at hsub
   exact hd hsub
 
-
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
   by_contra! h
   rcases h with ⟨n, hn⟩
-  have hngt1 : n > 1 := by
-    by_contra! hn0
-    have h2 : (2 : ℕ).Prime := by
-      exact Nat.prime_two
-    have hcon : 2 ≤ n := by
-      exact hn 2 h2
-    have hlt : 2 ≤ 1 := by
-      exact Nat.le_trans (hn 2 h2) hn0
-    have hlt' : ¬ (2 ≤ 1) := by
-      exact Nat.not_le_of_gt (by decide)
-    exact hlt' hlt
   let m := Nat.factorial n + 1
-  have hmneq : m ≠ 1 := by
+  have hmneq1 : m ≠ 1 := by
     refine (Nat.add_one_ne_add_one_iff.mpr) ?_
     exact Nat.factorial_ne_zero n
-  have ⟨p, ⟨hp1,hp2⟩⟩ := Nat.exists_prime_and_dvd (hmneq)
-  have hpleqn :=hn p hp1
+  have ⟨p, ⟨hp1,hp2⟩⟩ := Nat.exists_prime_and_dvd (hmneq1)
   have hpdvd : p ∣ Nat.factorial n := by
-    exact Nat.dvd_factorial (Nat.Prime.pos hp1) hpleqn
+    refine Nat.dvd_factorial (Nat.Prime.pos hp1) ?_
+    exact hn p hp1
   have hpndvd : ¬ (p ∣ Nat.factorial n + 1):= by
     exact exercise1 (Nat.Prime.ne_one hp1) hpdvd
   exact hpndvd hp2
@@ -95,7 +79,10 @@ theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := b
   induction I using Finset.induction_on with
   | empty => exact Nat.dvd_of_mod_eq_zero rfl
   | @insert a I ha hI =>
-  sorry
+    rcases hI with ⟨k, hk⟩
+    have ⟨l, hl⟩ : d ∣ f a := h a
+    use k + l
+    rw[Finset.sum_insert ha, hl, hk, Nat.mul_add, Nat.add_comm]
 end
 
 /-
