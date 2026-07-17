@@ -75,14 +75,14 @@ variable {I : Finset α} {f : α → ℕ}
 
 
 -- Use what we learned to prove the following theorem.
+omit [DecidableEq α] in
 theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
-  induction I using Finset.induction_on with
-  | empty => exact Nat.dvd_of_mod_eq_zero rfl
-  | @insert a I ha hI =>
-    rcases hI with ⟨k, hk⟩
-    have ⟨l, hl⟩ : d ∣ f a := h a
-    use k + l
-    rw[Finset.sum_insert ha, hl, hk, Nat.mul_add, Nat.add_comm]
+  classical
+  refine Finset.induction_on I ?_ ?_
+  · simp
+  · intro x P hnelem hP
+    rw [Finset.sum_insert hnelem]
+    exact Nat.dvd_add (h x) hP
 end
 
 /-
