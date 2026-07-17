@@ -12,8 +12,7 @@ theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
     by_cases hp : P
     · right
       intro hq
-      have h_and : P∧Q := ⟨hp, hq⟩
-      exact h h_and
+      exact h ⟨hp, hq⟩
     · left
       exact hp
   · intro h h1
