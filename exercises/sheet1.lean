@@ -87,4 +87,3 @@ theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rw[← Nat.mul_assoc]
 
 end
->>>>>>> Stashed changes
