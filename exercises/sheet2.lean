@@ -170,7 +170,13 @@ end
 /-
 Open question: Think about the following question:
 How can we formalize the prime factorization theorem in Lean?
-What would be the type of the decomposition of a natural number into its prime factors?
-How can you state the theorem that every natural number has a (unique) prime factorization?
-How would you prove it?
+What would be the type of the decomposition of a natural number into its prime factors? It would be the type ⟨S : Finset ℕ, f : S → ℕ⟩
+How can you state the theorem that every natural number has a (unique) prime factorization? Stated below.
+How would you prove it? The proof I would use is in the file titled "The_Fundamental_Theorem_of_Arithmetic_Proof.pdf." I hope you like it; I think it's clever.
 -/
+section -- Open question
+theorem fundamental_theorem_of_arithmetic_part_1 (n : ℕ) (h : n > 1) : ∃S ⊆ (Finset.range (n+1)).filter Nat.Prime,∃(f : S → ℕ), n = ∏ i : S, i.val^(f i) := by
+  sorry
+theorem fundamental_theorem_of_arithmetic_part_2 (S1 S2 : Finset ℕ) (f : S1 → ℕ) (g : ℕ → ℕ) (n : ℕ) : S1 ⊆ (Finset.range (n+1)).filter Nat.Prime ∧ S2 ⊆ (Finset.range (n+1)).filter Nat.Prime ∧ n = ∏ i : S1, i.val^(f i) ∧ n = ∏ i : S2, i.val^(g i)→ S1 = S2 ∧ ∀ i : S1, f i = g i.val := by
+  sorry
+end
