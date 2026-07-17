@@ -26,6 +26,11 @@ theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
   | inr hq =>
     exact hq
 
+theorem exercise2' (h : P ∨ Q) (hp : ¬ P) : Q := by
+  rcases h with hp' | hq
+  · contradiction
+  · exact hq
+
 end
 
 section -- Quantifiers
