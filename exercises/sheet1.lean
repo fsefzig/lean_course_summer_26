@@ -30,7 +30,6 @@ end
 section -- Quantifiers
 
 variable {T : Type} {P : T → Prop}
-
 /-
 Recall a proof of a universally quantified statement ∀ x, P x
 is an object of the product type ∏ (x : T), P x. In other words, a proof of ∀ x, P x
@@ -40,15 +39,12 @@ Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proo
 
 theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
-
-
 /-
 Whenever we want to prove a universally quantified statement ∀ x, P x,
 we can use the 'intro' tactic to introduce an element x of type T and change the goal to P x.
 -/
 
 theorem theorem_we_want_to_use (x : T) : P x := by
-  sorry -- use this theorem to prove exercise4
 
 theorem exercise4 : ∀ x, P x := by
   intro x
@@ -71,7 +67,6 @@ theorem exercise5 (h : ∀ x, P x) (y : T) : ∃ y, P y := by
 Finally, to use a hypothesis h : ∃ x, P x, we can use the 'rcases' tactic to obtain
 a witness x : T and a proof h' : P x.
 -/
-
 
 theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   rcases h with ⟨k, hk⟩
