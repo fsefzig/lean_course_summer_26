@@ -39,7 +39,6 @@ Thus, we can apply h : ∀ x, P x to an arbitrary element x : T to obtain a proo
 -/
 
 theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
-theorem exercise3 (h : ∀ x, P x) (x : T) : P x := by
   exact h x
 
 
