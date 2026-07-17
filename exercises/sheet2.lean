@@ -119,7 +119,7 @@ theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := 
   contrapose h3
   apply Nat.lt_of_not_le at h3
   exact Finset.mem_range.mpr h3
-/-Transparency: During this proof, I had ChatGPT help me learn the syntax required for this line 34 and 35.
+/-Transparency: During this proof, I had ChatGPT help me learn the syntax required for the product.
 I also used it to remind me how to split \and using rcases. I also used it for some other syntax and stuff.
 The proof is based on Euclid's approach. The rest was all apply? exact?!
 I tried to avoid using ChatGPT too much, and I think I did a pretty good job (I only used it when I was really confused for troubleshooting help).-/
@@ -146,6 +146,15 @@ variable {I : Finset α} {f : α → ℕ}
 
 
 -- Use what we learned to prove the following theorem.
+theorem exercise3_induction_proof (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
+  classical
+  induction I using Finset.induction_on with
+  | empty => simp
+  | @insert a s z r =>
+    rw[Finset.sum_insert]
+    · exact (Nat.dvd_add_iff_right (h a)).mp r
+    exact z
+
 theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
   have h1 : ∃g : α → ℕ,∀ x, d*(g x) = f x := by
     use fun x ↦ (f x)/d
@@ -156,6 +165,7 @@ theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := b
   rw[Finset.mul_sum]
   exact Eq.symm (Finset.sum_congr rfl fun x a ↦ hg x)
 end
+
 
 /-
 Open question: Think about the following question:
