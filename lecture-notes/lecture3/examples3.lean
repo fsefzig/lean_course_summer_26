@@ -15,7 +15,7 @@ variable {n m p d : ℕ}
 
 #check (Nat.Prime p)
 
-#check p.Prime
+#check p.Prime //shorthand; basically just check if p is prime
 
 #check (Nat.dvd_prime )
 
@@ -58,13 +58,21 @@ variable (n : ℕ)
 
 theorem Gauss_sum (n : ℕ) : ∑ i ∈ Finset.range (n + 1), i = n * (n + 1) / 2 := by
   induction n with
-  | zero => rfl
-  | succ n ih =>
-      calc
-        ∑ i ∈ Finset.range (n + 1 + 1), i
+  | zero => rfl --induction always starts at zero
+
+
+  | succ n ih => --n is the same n as in theproof, ih is induct hypo
+      calc --this is just to calculate stuff when its complicated
+      --prove an equation by calculating
+
+        ∑ i ∈ Finset.range (n + 1 + 1), i --sum from 1+2+..+n+1
+
           = (∑ i ∈ Finset.range (n + 1), i) + (n + 1) := by
+          --sum up to n                     +n +1
             exact Finset.sum_range_succ (fun x ↦ x) (n + 1)
         _ = n * (n + 1) / 2 + (n + 1) := by rw [ih]
+        --notice the underscores, must be this exact formatting
+
         _ = (n * (n + 1) + (n + 1) * 2) / 2 := by
           refine (Nat.add_mul_div_right (n * (n + 1)) (n + 1) ?_).symm
           exact Nat.succ_pos 1
@@ -96,13 +104,16 @@ def NatinRat := {q : ℚ // ∃ n : ℕ, q = (n : ℚ)}
 
 end
 
-section -- Complete Induction
+section -- Strong Induction
+--this is proved using induction
+
 variable (P : ℕ → Prop)
 
 def complete_induction (P : ℕ → Prop) : Prop :=
   (P 0 ∧ (∀ n, (∀ m, m ≤ n → P m) → P (n + 1))) → ∀ n, P n
 
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
+--Q is the statement that P holds for all m less than n
 
 lemma Q_zero_of_P_zero : P 0 → Q P 0 := by
   intro hP0 m hm

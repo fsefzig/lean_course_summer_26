@@ -79,7 +79,6 @@ and the 'right' tactic creates a subgoal for the second disjunct.
 theorem example3'' (h : P ∨ Q) : Q ∨ P := by
   cases h with --we dont know which of the two sides is true
   -- here being the h: P ∨ Q
-
   | inl hp => --case of the left true, we call it hp
       right  --and then we run right upon the Q ∨ P
       exact hp
@@ -87,7 +86,7 @@ theorem example3'' (h : P ∨ Q) : Q ∨ P := by
       left  --run the left upon the Q ∨ P
       exact hq
 
-
+/-
 --FIGURE THIS OUT!!
 theorem example3''' (h : P ∨ Q) : Q ∨ P := by
   rcases h with h1 | h2
@@ -98,7 +97,7 @@ theorem example3''' (h : P ∨ Q) : Q ∨ P := by
   | h2
     left
     exact hnq
-
+-/
 
 
 -- Example 4. NOT is a function to false

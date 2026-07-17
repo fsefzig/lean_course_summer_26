@@ -56,10 +56,3 @@ theorem qpractice13 (h : ∀ x, P x → Q x) : (∃ x, P x) → (∃ x, Q x) := 
 
 end
 
-
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/leomdeng/MathInLean.git
-git push -u origin main

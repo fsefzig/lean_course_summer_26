@@ -64,6 +64,7 @@ Whenever we want to prove a universally quantified statement ∀ x, P x,
 we can use the 'intro' tactic to introduce an element x of type T and change the goal to P x.
 -/
 
+
 theorem theorem_we_want_to_use (x : T) : P x := by
   sorry -- use this theorem to prove exercise4
 
