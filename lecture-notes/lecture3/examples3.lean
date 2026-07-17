@@ -30,7 +30,8 @@ theorem example1 (hn : d ∣ n) (hm : d ∣ m) : d ∣ n + m := by
 theorem example3 (h : n > 1) : n * n > n := by
   exact Nat.lt_mul_self_iff.mpr h
 
-theorem example4 (hp : p.Prime) : ¬ ((p * p).Prime) := by
+theorem example4 (hp : p.Prime) : ¬ ((p^2).Prime) := by
+  rw[pow_two]
   have hpneq1 : p ≠ 1 := by
     exact Nat.Prime.ne_one hp
   have h : p ≠ p * p := by
@@ -104,16 +105,34 @@ def complete_induction : Prop :=  (P 0 ∧ (∀ n, (∀ m, m ≤ n → P m) → 
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
 
 lemma Q_zero_of_P_zero : P 0 → Q P 0 := by
-  sorry
+  intro h
+  have h1 : ∀ m, m ≤ 0 → P m := by
+    intro m a
+    apply Nat.le_zero.mp at a
+    rw[a]
+    exact h
+  exact h1
 
 lemma P_n_of_Q_n (n : ℕ) : Q P n -> P n := by
-  sorry
+  intro h
+  apply h
+  exact Nat.le_refl n
 
 lemma Q_succ_of_Q_n_of_P_succ_of_Q_n (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
-  sorry
+  intro h1 h2
+  have h3 := h1 h2
+  intro h4 h5
+  apply fun a ↦ Nat.le_or_eq_of_le_succ a at h5
+  rcases h5 with h6 | h7
+  · apply h2
+    exact h6
+  rw[h7]
+  exact h3
 
 lemma P_of_Q : (∀ n, Q P n) -> ∀ n, P (n) := by
-  sorry
+  intro h1 h2
+  apply P_n_of_Q_n
+  exact h1 h2
 
 theorem induction_implies_complete_induction : complete_induction P := by
   intro ⟨hP0, hQP⟩
