@@ -78,7 +78,7 @@ theorem exercise6 (n : Nat) (h : ∃ k, n = 2 * k) : ∃ l, n*n = 4 * l := by
   use k*k
   rw [hk]
   rw[Nat.mul_assoc, Nat.mul_comm 2 k, Nat.mul_comm k (k * 2), Nat.mul_comm k 2]
-  have help : 2 * 2 = 4 := by exact Nat.succ_mul_succ 1 1
+  have help : 2 * 2 = 4 := by rfl
   rw[← Nat.mul_assoc, ← Nat.mul_assoc, help, Nat.mul_assoc]
 
 end
