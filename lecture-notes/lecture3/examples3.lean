@@ -86,17 +86,43 @@ def complete_induction : Prop :=  (P 0 ∧ (∀ n, (∀ m, m ≤ n → P m) → 
 
 def Q (P : ℕ → Prop) (n : ℕ) : Prop := ∀ m, m ≤ n → P m
 
+-- theorem test (n : ℕ) : (n ≤ 0 → n = 0) := by
+--   exact Nat.eq_zero_of_le_zero
+
 lemma lemma0 : P 0 → Q P 0 := by
-  sorry
+  intro h n h1
+  apply Nat.eq_zero_of_le_zero at h1
+  rw [h1]
+  exact h
 
 lemma lemma1 (n : ℕ) : Q P n -> P n := by
-  sorry
+  intro h
+  have hn := h n
+  have hr := Nat.le_refl n
+  apply hn at hr
+  exact hr
+
+-- theorem what (m : ℕ) (n : ℕ) : (m ≤ n+1) → (m ≤ n) ∨ (m = n + 1) := by
+--   exact Nat.le_or_eq_of_le_succ
 
 lemma lemma2 (n : ℕ) : (Q P n -> P (n + 1)) -> (Q P n -> Q P (n + 1)) := by
-  sorry
+  intro h h1
+  have hp := h h1
+  intro m
+  intro hm
+  have hbruh : (m ≤ n) ∨ (m = n + 1) := by
+    exact Nat.le_or_eq_of_le_succ hm
+  rcases hbruh with hleft | hright
+  · have hok := h1 m
+    exact hok hleft
+  · rw [← hright] at hp
+    exact hp
 
 lemma lemma3 : (∀ n, Q P n) -> ∀ n, P (n) := by
-  sorry
+  intro h n
+  have hn := h n
+  apply lemma1 at hn
+  exact hn
 
 theorem induction_implies_complete_induction : complete_induction P := by
   intro ⟨hP0, hQP⟩
