@@ -9,7 +9,7 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 -/
 
 section -- More on divisiblity
-theorem exercise0 {d k n : ℕ} (hd : d ≠ 0) (hk : k > 1) (h : n = d * k) : d < n := by
+theorem exercise0 (d k n : ℕ) (hd : d ≠ 0) (hk : k > 1) (h : n = d * k) : d < n := by
   rw[h]
   refine (Nat.lt_mul_iff_one_lt_right ?_).mpr hk
   exact Nat.zero_lt_of_ne_zero hd
@@ -176,7 +176,65 @@ How would you prove it? The proof I would use is in the file titled "The_Fundame
 -/
 section -- Open question
 theorem fundamental_theorem_of_arithmetic_part_1 (n : ℕ) (h : n > 1) : ∃S ⊆ (Finset.range (n+1)).filter Nat.Prime,∃(f : S → ℕ), n = ∏ i : S, i.val^(f i) := by
+  apply Nat.exists_eq_add_of_le' at h
+  rcases h with ⟨k,hk⟩
+  induction k using Nat.strong_induction_on generalizing n with
+  | h k ih =>
+    cases k with
+    | zero =>
+      use {2}
+      constructor
+      · refine Finset.singleton_subset_iff.mpr ?_
+        refine Finset.mem_filter.mpr ?_
+        constructor
+        · refine Finset.mem_range.mpr ?_
+          rw[hk]
+          trivial
+        exact Nat.prime_two
+      use fun a ↦ 1
+      exact hk
+    | succ k =>
+      have h1 : ∃p : ℕ, Nat.Prime p ∧ p ∣ n := by
+        refine Nat.exists_prime_and_dvd ?_
+        rw[hk]
+        exact Ne.symm (Nat.ne_of_beq_eq_false rfl)
+      rcases h1 with ⟨p,hp⟩
+      by_cases h3 : n = p
+      · use {p}
+        constructor
+        · refine Finset.singleton_subset_iff.mpr ?_
+          refine Finset.mem_filter.mpr ?_
+          constructor
+          · have h : p < n + 1 := by
+              refine Order.lt_add_one_iff.mpr ?_
+              exact Nat.le_of_eq (id (Eq.symm h3))
+            exact Finset.mem_range.mpr h
+          exact hp.1
+        use fun a ↦ 1
+        simp
+        exact h3
+      rcases hp.right with ⟨m,hm⟩
+      have h : m < n := by
+        apply exercise0 m p n
+        · by_contra
+          rw[this] at hm
+          rw[hm] at hk
+          trivial
+        · exact Nat.Prime.one_lt hp.1
+        rw[mul_comm]
+        exact hm
+      apply ih at k
+      rename_i k'
+      have h1 : k' < k' + 1 := by
+        exact lt_add_one k'
+      apply k at h1
+      have h2 : n - 1 = k' + Nat.succ 1 := by
+        exact Nat.pred_eq_succ_iff.mpr hk
+      apply h1 at h2
+      sorry
+    sorry
   sorry
+
 theorem fundamental_theorem_of_arithmetic_part_2 (S1 S2 : Finset ℕ) (f : S1 → ℕ) (g : ℕ → ℕ) (n : ℕ) : S1 ⊆ (Finset.range (n+1)).filter Nat.Prime ∧ S2 ⊆ (Finset.range (n+1)).filter Nat.Prime ∧ n = ∏ i : S1, i.val^(f i) ∧ n = ∏ i : S2, i.val^(g i)→ S1 = S2 ∧ ∀ i : S1, f i = g i.val := by
   sorry
 end
