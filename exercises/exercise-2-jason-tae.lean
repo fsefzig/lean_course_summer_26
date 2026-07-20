@@ -11,14 +11,32 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 
 section -- More on divisiblity
 
-theorem exercise0 {d k n : ℕ} (hd : d ≠ 1) (h : n = d * k) : d < n := by
-  sorry
+theorem exercise0 {d k n : ℕ} (hd : d ≠ 1) (hd0 : d ≠ 0) (hk : k ≠ 0)
+    (h : n = d * k) : d < n := by
+  subst h
+  rcases Nat.lt_or_ge k 2 with hk2 | hk2
+  · interval_cases k
+    · exact absurd rfl hk
+    · simp at hd ⊢
+      omega
+  · calc d = d * 1 := by ring
+      _ < d * k := by
+          apply Nat.mul_lt_mul_left
+          · omega
+          · omega
+      _ = d * k := rfl
 
 theorem exercise1 {d n : ℕ} (hd : d ≠ 1) (h : d ∣ n) : ¬ (d ∣ n + 1):= by
-  sorry
+  intro h2
+  have hdiff : d ∣ (n + 1) - n := Nat.dvd_sub' h2 h
+  simp at hdiff
+  have := Nat.dvd_one.mp hdiff
+  exact hd this
 
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
-  sorry
+  intro n
+  obtain ⟨p, hp_ge, hp_prime⟩ := Nat.exists_infinite_primes (n + 1)
+  exact ⟨p, hp_prime, hp_ge⟩
 
 end
 
@@ -44,7 +62,9 @@ variable {I : Finset α} {f : α → ℕ}
 
 -- Use what we learned to prove the following theorem.
 theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
-  sorry
+  apply Finset.dvd_sum
+  intro i _
+  exact h i
 end
 
 /-
