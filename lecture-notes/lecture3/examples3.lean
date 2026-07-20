@@ -6,7 +6,6 @@ import Mathlib.Data.Rat.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 
-
 section -- Divisiblity
 
 variable {n m p d : ℕ}
