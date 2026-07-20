@@ -149,7 +149,6 @@ lemma PExp_supp_nempty_of_gt_one {n : ℕ} (hn : n > 1) : Nonempty (PExp n).supp
     rw [mul_comm] at hk
     have hklt := exercise0 (Nat.ne_zero_of_lt hn) (hkne) hk
     exact Nat.le_of_lt hklt
-
   exact ⟨hp1, hp2⟩
 
 lemma PExp_mul_remainder (n : ℕ) (p : (PExp n).support) :
