@@ -23,10 +23,11 @@ abbrev remainder (n p : ℕ) : ℕ := (maxPowDvdDiv p n).2
 
 /-
 Lecture lemma 1: the largest power of `p` occurring in `n` divides `n`.
+The lemma is a useful reformulation of exercise 1.
 -/
 lemma product_of_primeExponent (n p : ℕ) :
     n = p ^ primeExponent n p * remainder n p := by
-    simp only [fst_maxPowDvdDiv, snd_maxPowDvdDiv, pow_padicValNat_mul_divMaxPow]
+    sorry
 
 
 theorem exercise1 (p n : ℕ) :
