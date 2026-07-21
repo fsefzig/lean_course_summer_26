@@ -108,6 +108,7 @@ sets are modelled as subtypes in lean. More precisely, given a set A of type α,
 P : α → Prop, P x := x ∈ A, and then the subtype { x : α | P x } is equivalent to the set A.
 In fact, Lean has a built-in type Set α ('sets of type α'),
 it is defined as the type of functions α → Prop.
+In particular, statements like A ∈ A for some set A don't make sense in this framework!
 -/
 
 #check Set α
@@ -142,7 +143,7 @@ Real world example: Consider the set of primes Primes := {p : ℕ | p.Prime}.
 If we want to multiply p and q, then we need to convert them to natural numbers first.
 -/
 
-def Primes := {p : ℕ | p.Prime}
+def Primes : Set ℕ := {p : ℕ | p.Prime}
 
 -- Lean does not know how to multiply p and q!
 example (p q : Primes) : ¬ (p * q).Prime := by
