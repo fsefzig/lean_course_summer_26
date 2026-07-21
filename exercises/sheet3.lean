@@ -48,21 +48,18 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
   · intro h
     by_cases hqeq : p = q
     · exact Or.inl hqeq
-    · right
-      have hprod := product_of_primeExponent n q
-      rw [hprod] at h
+    · rw [product_of_primeExponent n q] at h
       apply Nat.Prime.dvd_or_dvd hp at h
       rcases h with hpdvdq | hqdvdr
       · apply Nat.Prime.dvd_of_dvd_pow hp at hpdvdq
         have hpq : p = q := by exact (Nat.prime_dvd_prime_iff_eq hp hq).mp hpdvdq
         contradiction
-      · exact hqdvdr
+      · exact Or.inr hqdvdr
   rintro (heq | hdiv)
   · rw[heq]
     exact hqn
   obtain ⟨k, hk⟩ := hdiv
-  have hprod := product_of_primeExponent n q
-  rw [hprod, hk]
+  rw [product_of_primeExponent n q, hk]
   use q ^ primeExponent n q * k
   group
 
@@ -91,10 +88,20 @@ Lecture lemma 4: removing the largest power of `q` does not change the exponent
 of a different prime `p`.
 -/
 
-lemma primeExponent_le_of_dvd {n m p : ℕ} (hp : p.Prime) (h : n ∣ m) :
-    primeExponent n p ≤ primeExponent m p := by
-  sorry
+lemma padicValNat_mul (n m p : ℕ) (hm : m ≠ 0) (hn : n ≠ 0) (hp : p.Prime) :
+  padicValNat p (m * n) = padicValNat p m + padicValNat p n := by
+  refine @padicValNat.mul _ _ _ ?_ hm hn
+  exact { out := hp }
 
+lemma primeExponent_mul {n m p : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) (hp : p.Prime) :
+    primeExponent (m * n) p = primeExponent m p + primeExponent n p := by
+  simp only [primeExponent, fst_maxPowDvdDiv]
+  exact padicValNat_mul n m p hm hn hp
+
+lemma primeExponent_coprime {n p : ℕ} (hcoprime : ¬p ∣ n) :
+    primeExponent n p = 0 := by
+  simp only [primeExponent, fst_maxPowDvdDiv]
+  exact padicValNat.eq_zero_of_not_dvd hcoprime
 
 theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     (hn : n ≠ 0) :
@@ -103,17 +110,18 @@ theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
   · by_cases hqdvd : q ∣ n
     · have hmul : primeExponent n p =
         primeExponent (q ^ primeExponent n q) p + primeExponent (remainder n q) p := by
-        rw[product_of_primeExponent n q]
-        sorry
+        nth_rewrite 1 [product_of_primeExponent n q]
+        refine primeExponent_mul ?_ ?_ hp
+        · apply pow_ne_zero
+          exact Nat.Prime.ne_zero hq
+        exact Nat.ne_zero_of_mul_ne_zero_right (product_of_primeExponent n q ▸ hn)
       have hzero : primeExponent (q ^ primeExponent n q) p = 0 := by
         simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
         right
         right
         intro h
         apply Nat.Prime.dvd_of_dvd_pow hp at h
-        have hpq' : p = q := by
-          exact (Nat.prime_dvd_prime_iff_eq hp hq).mp h
-        contradiction
+        exact hpq ((Nat.prime_dvd_prime_iff_eq hp hq).mp h)
       rw[hmul , hzero]
       exact Nat.zero_add (primeExponent (remainder n q) p)
     have hrem : remainder n q = n := by
@@ -132,6 +140,7 @@ theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
     exact Or.inr (Or.inr hpndvdr)
   rw[hlhs, hrhs]
+
 /-!
 ## Applications of prime factorization
 
