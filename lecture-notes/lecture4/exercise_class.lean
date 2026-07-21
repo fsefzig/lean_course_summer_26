@@ -98,7 +98,7 @@ Given a type α and a predicate P : α → Prop, we can consider the subtype
 { x : α | P x }. This type is defined by adding the rule P x to the type α.
 -/
 
-variable {α : Type} (P : α → Prop) {x : α}
+variable {α : Type} (P Q : α → Prop) {x : α}
 
 def A (P : α → Prop) := { x : α | P x } --subtype of α defined by P
 
@@ -137,9 +137,10 @@ example (y : A P) : P y.val := by
 example (y : A P) : P y := by
   exact y.prop
 
-
 /-
-Real world example: Consider the set of primes Primes := {p : ℕ | p.Prime}.
+Sets and subtypes: Consider the set of primes Primes := {p : ℕ | p.Prime}.
+There is a difference between x : Primes and x : ℕ, x.Prime.
+Namely, results about natural numbers only apply directly to x : ℕ not to x : Primes. For example:
 If we want to multiply p and q, then we need to convert them to natural numbers first.
 -/
 
@@ -151,4 +152,34 @@ example (p q : Primes) : ¬ (p * q).Prime := by
 
 -- so we need to convert them to natural numbers first.
 example (p q : Primes) : ¬ (p.val * q.val).Prime := by
+  sorry
+
+/-
+The following examples are relevant for the last two exercises of the exercise sheet.
+These exercises are a bit harder, and we will talk about sets and subtypes in more detail in
+the next lecture. Feel free to try them out, but you can also skip them for now.
+-/
+
+-- union of two subtypes corresponds to OR
+example (x : α) : x ∈ A P ∪ A Q ↔ P x ∨ Q x := by
+  exact Eq.to_iff rfl
+
+-- union of two subtypes corresponds to AND
+example (x : α) : x ∈ A P ∩ A Q ↔ P x ∧ Q x := by
+  exact Eq.to_iff rfl
+
+-- containment of subtypes corresponds to implication
+example : A P ⊆ A Q ↔ ∀ x, P x → Q x := by
+  exact Eq.to_iff rfl
+
+-- equalities between subtypes can be proved by extensionality
+example (h : ∀ x, P x ↔ Q x) : A P = A Q := by
+  ext x
+  exact h x
+
+-- alternatively, equality can between sets can be proved by proving both containments
+example (h : ∀ x, P x ↔ Q x) : A P = A Q := by
+  apply Set.Subset.antisymm_iff.mpr
+  constructor
+  · sorry
   sorry
