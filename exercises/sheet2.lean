@@ -12,12 +12,50 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 section -- More on divisiblity
 
 theorem exercise0 {d k n : ℕ} (hn : n ≠ 0) (hd : d ≠ 1) (h : n = d * k) : k < n := by
+  have hd0 : d ≠ 0 := by
+    intro hd_zero
+    rw [hd_zero] at h
+    simp at h
+    exact hn h
+  rw [h]
+  have hk0 : k ≠ 0 := by
+    intro hk
+    rw [hk] at h
+    simp at h
+    exact hn h
+  have hkpos : k > 0 := by 
+    exact Nat.zero_lt_of_ne_zero hk0
+  have hd1le : 1 ≤ d := Nat.one_le_iff_ne_zero.mpr hd0
+  have hdpos: 1 < d := by 
+    exact Nat.lt_of_le_of_ne hd1le (id (Ne.symm hd))
+  have hdk : 1 * k < d * k := by
+    exact Nat.mul_lt_mul_of_pos_right hdpos hkpos
+
+  simp at hdk
+  exact hdk
+
+
+
+    
+  
+  
+  
+    
+  
+    
+
   sorry
 
 theorem exercise1 {d n : ℕ} (hd : d ≠ 1) (h : d ∣ n) : ¬ (d ∣ n + 1):= by
-  sorry
+  intro hp1
+  have hsub : d ∣ (n + 1) - n := by 
+    exact Nat.dvd_sub hp1 h
+  simp at hsub
+  exact hd hsub
 
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
+  intro n
+  
   sorry
 
 end
@@ -44,7 +82,11 @@ variable {I : Finset α} {f : α → ℕ}
 
 -- Use what we learned to prove the following theorem.
 theorem exercise3 (d : ℕ) (h : ∀ x, d ∣ f x) : d ∣ ∑ i ∈ I, f i := by
-  sorry
+  induction I using Finset.induction_on with 
+  | empty => 
+  simp only [Finset.sum_empty, dvd_zero]
+  | @insert a I ha ih =>
+  
 end
 
 /-
