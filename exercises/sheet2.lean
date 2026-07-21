@@ -12,30 +12,21 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 section -- More on divisiblity
 
 theorem exercise0 {d k n : ℕ} (hn : n ≠ 0) (hd : d ≠ 1) (h : n = d * k) : k < n := by
-  nth_rewrite 1 [h, ← one_mul k, Nat.mul_lt_mul_right]
-  · exact Nat.one_lt_iff_ne_zero_and_ne_one.mpr ⟨fun hd' => hn (mul_eq_zero_of_left hd' k ▸ h), hd⟩
-  · exact Nat.zero_lt_of_ne_zero fun hk' => hn (mul_eq_zero_of_right d hk' ▸ h)
+  have hk : 0 < k := Nat.pos_of_ne_zero (Nat.ne_zero_of_mul_ne_zero_right (ne_of_ne_of_eq' hn h))
+  rw [← one_mul k, h, Nat.mul_lt_mul_right hk, Nat.one_lt_iff_ne_zero_and_ne_one]
+  exact ⟨fun hd' => hn (mul_eq_zero_of_left hd' k ▸ h), hd⟩
 
 theorem exercise1 {d n : ℕ} (hd : d ≠ 1) (h : d ∣ n) : ¬ (d ∣ n + 1):= by
   exact fun hd' => hd (Nat.eq_one_of_dvd_one (Nat.add_sub_cancel_left n 1 ▸ Nat.dvd_sub hd' h))
 
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
-  intro n
-  by_cases hnp : (Nat.factorial n + 1).Prime
-  · exact ⟨Nat.factorial n + 1, ⟨hnp, Nat.lt_add_one_of_le (Nat.self_le_factorial n)⟩⟩
-  · use Nat.minFac (Nat.factorial n + 1)
-    constructor
-    · exact Nat.minFac_prime (Nat.add_one_ne_add_one_iff.mpr (Nat.factorial_ne_zero n))
-    · by_contra h
-      impossible by simp
-      /-
-        to not lean on simp:
-        say (n.factorial + 1).minFac ≤ n
-        and then say (n.factorial + 1).minFac + c = n
-        so minFac is n - c
-        show that 2 ≤ n - c ≤ n, and then that m | n.factorial when 2 ≤ m ≤ n
-        use exercise1 to show ¬(n - c | n.factorial + 1) and get contradiction
-      -/
+  by_contra! ⟨n, hp⟩
+  let p := Nat.minFac (n.factorial + 1)
+  have hp' : p.Prime :=
+    Nat.minFac_prime (Nat.succ_ne_succ_iff.mpr (Nat.factorial_ne_zero n))
+  exact exercise1 hp'.ne_one
+    (Nat.dvd_factorial (Nat.minFac_pos _) (hp p hp'))
+    (Nat.minFac_dvd _)
 
 end
 
