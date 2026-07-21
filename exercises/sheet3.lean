@@ -27,12 +27,12 @@ The lemma is a useful reformulation of exercise 1.
 -/
 lemma product_of_primeExponent (n p : ℕ) :
     n = p ^ primeExponent n p * remainder n p := by
-    sorry
-
+  simp only [fst_maxPowDvdDiv, snd_maxPowDvdDiv, pow_padicValNat_mul_divMaxPow]
 
 theorem exercise1 (p n : ℕ) :
     p ^ primeExponent n p ∣ n := by
-  sorry
+  use remainder n p
+  exact product_of_primeExponent n p
 
 /-
 Lecture lemma 2: after removing the largest power of `q`, every prime divisor of
@@ -42,7 +42,13 @@ the prime factorization of `n`.
 -/
 theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
     p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
-  sorry
+  constructor
+  · intro h
+    set k := remainder n q with hk
+    sorry
+  · intro h
+    sorry
+#check Subtype
 
 /-
 Lecture lemma 3: the chosen prime no longer divides the remainder.  The
@@ -50,7 +56,9 @@ nonzero hypothesis is necessary: every natural number divides zero.
 -/
 theorem exercise3 {p n : ℕ} (hp : p.Prime) (hn : n ≠ 0) :
     ¬p ∣ remainder n p := by
-  sorry
+  refine not_dvd_divMaxPow ?_ ?_
+  · exact Prime.one_lt hp
+  · exact hn
 
 /-
 Lecture lemma 4: removing the largest power of `q` does not change the exponent
@@ -67,12 +75,14 @@ lemma padicValNat_mul (n m p : ℕ) (hm : m ≠ 0) (hn : n ≠ 0) (hp : p.Prime)
   exact { out := hp }
 
 lemma primeExponent_mul {n m p : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) (hp : p.Prime) :
-    primeExponent (m * n) p = primeExponent m p + primeExponent n p := by
-  sorry
+    primeExponent (m * n) p = primeExponent m p + primeExponent n p
+    := by
+  exact padicValNat_mul n m p hm hn hp
 
 lemma primeExponent_coprime {n p : ℕ} (hcoprime : ¬p ∣ n) :
     primeExponent n p = 0 := by
-  sorry
+  simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
+  right; right; exact hcoprime
 
 /- a useful result from the library, it is a reformulation of the fact that the prime exponent
 is the largest power of p that divides n.
@@ -108,7 +118,18 @@ We will discuss set operations during the exercise class tomorrow!
 /- Every prime dividing both `n` and `m` also divides `n + m`. -/
 theorem exercise5 (n m : ℕ) :
     (Nat.gcd n m).factorization.support ⊆ (n + m).factorization.support := by
-  sorry
+  refine Finset.subset_iff.mpr ?_
+  intro x hx
+  simp only [support_factorization, mem_primeFactors, ne_eq, Nat.add_eq_zero_iff, not_and] at *
+  have ⟨hn, hm⟩ := Nat.gcd_dvd n m
+  refine ⟨hx.1, ⟨?_, ?_⟩⟩
+  · exact Nat.dvd_add
+      (Nat.dvd_trans hx.2.1 hn)
+      (Nat.dvd_trans hx.2.1 hm)
+  · intro h₁ h₂
+    refine hx.2.2 ?_
+    rw [h₁, h₂]
+    simp
 
 /- The prime divisors of the least common multiple are exactly the prime
 divisors occurring in either number.  The nonzero assumptions exclude the
@@ -116,6 +137,24 @@ special case in which `Nat.lcm n m = 0`. -/
 theorem exercise6 {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) :
     n.factorization.support ∪ m.factorization.support =
       (Nat.lcm n m).factorization.support := by
-  sorry
+  ext a
+  simp only [support_factorization, Finset.mem_union, mem_primeFactors, ne_eq, Nat.lcm_eq_zero_iff,
+    not_or]
+  constructor
+  · intro h
+    sorry
+  · intro h
+    sorry
+
+#check Finsupp
+#check Finsupp.prod
+
+/-
+Nat.factorization 10 : ℕ →₀ ℕ
+
+5 ↦ 1
+2 ↦ 1
+x ↦ 0
+-/
 
 end Sheet3

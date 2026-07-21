@@ -6,7 +6,12 @@ How do define functions in lean?
 The basic syntax is as follows (this is called lambda natotation):
 -/
 
+#check ℕ → ℕ
+#check ∃(n : ℕ), n = 5
+
 def f : ℕ → ℕ := fun n => n + 1
+
+def f' (n : ℕ) : ℕ := n + 1
 
 /-
 For more complicated functions, we can use pattern matching.
@@ -20,6 +25,8 @@ def fac : ℕ → ℕ
 def sum : List ℕ → ℕ
   | [] => 0
   | x :: xs => x + sum xs
+
+
 
 -- We can match on more cases as long as the matching is exhaustive.
 def fib : ℕ → ℕ
@@ -102,6 +109,16 @@ variable {α : Type} (P Q : α → Prop) {x : α}
 
 def A (P : α → Prop) := { x : α | P x } --subtype of α defined by P
 
+#check A
+
+#check Set ℕ
+
+-- Set ℕ := ℕ → Prop
+-- fun n => IsEven n : Set ℕ
+
+theorem test (n : ℕ) (S : Set ℕ) : n ∈ S := by
+  #check S n
+
 /-
 You may notice that the above notation looks very similar to the set builder notation, and in fact,
 sets are modelled as subtypes in lean. More precisely, given a set A of type α, we can consider
@@ -136,6 +153,32 @@ example (y : A P) : P y.val := by
 -- lean can automatically coerce y : A P to y.val : α.
 example (y : A P) : P y := by
   exact y.prop
+
+
+#check Coe
+#check Group
+
+
+-- Set ℕ := ℕ → Prop
+def IsEven (n : ℕ) : Prop := ∃(d : ℕ), d * 2 = n
+
+def EvenNums : Set ℕ := IsEven
+
+example : 2 ∈ EvenNums := by sorry
+example : IsEven 2 := sorry
+
+def TypeOfEvenNums : Type := {n : ℕ // IsEven n}
+
+-- TypeOfEvenNums := (n : ℕ) × (IsEven n)
+
+example (x : TypeOfEvenNums) : 2=2 := by
+  obtain ⟨n, hn⟩ := x
+
+#check Coe
+
+#check Nat.add_eq_zero
+
+
 
 /-
 Sets and subtypes: Consider the set of primes Primes := {p : ℕ | p.Prime}.
