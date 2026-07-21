@@ -14,28 +14,31 @@ Your first task is to prove lemmas 0-3 from the lecture notes.
 section -- More on divisiblity
 
 theorem exercise0 {d k n : ℕ} (hn : n ≠ 0) (hd : d ≠ 1) (h : n = d * k) : k < n := by
-  have hdneq : d ≠ 0 := by
-    intro hd
-    rw[hd, Nat.zero_mul] at h
+ have hdneq : d ≠ 0 := by
+    intro hd0
+    rw [hd0, Nat.zero_mul] at h
     exact hn h
-  by_contra! hk_leq_n
-  have hmul : d * n ≤ d * k := by
-    exact Nat.mul_le_mul_left d hk_leq_n
-  rw[← h] at hmul
-  have hnemul : ¬ (d * n ≤ n) := by
-    push Not
-    refine (Nat.lt_mul_iff_one_lt_left ?_).mpr ?_
+ by_contra! hk
+ have hmul : d * n ≤ d * k := by
+    exact Nat.mul_le_mul_left d hk
+ rw [← h] at hmul
+
+ have hnot : ¬ (d * n ≤ n) := by
+    push_neg
+    refine (Nat.lt_mul_iff_one_lt_left ?_).2 ?_
     · exact Nat.zero_lt_of_ne_zero hn
-    · exact Nat.one_lt_iff_ne_zero_and_ne_one.mpr ⟨hdneq, hd⟩
-  exact hnemul hmul
+    · exact Nat.one_lt_iff_ne_zero_and_ne_one.2 ⟨hdneq, hd⟩
+ exact hnot hmul
+
 
 theorem exercise1 {d n : ℕ} (hd : d ≠ 1) (h : d ∣ n) : ¬ (d ∣ n + 1):= by
   by_contra hsucc
-  have hsub : d ∣ n + 1 - n := by
+  have hsub : d ∣ (n + 1 - n) := by
     exact Nat.dvd_sub hsucc h
-  rw[Nat.add_sub_self_left n 1] at hsub
-  apply Nat.eq_one_of_dvd_one at hsub
-  exact hd hsub
+  rw [Nat.add_sub_self_left n 1] at hsub
+  have hone : d = 1 := by
+    exact Nat.eq_one_of_dvd_one hsub
+  exact hd hone
 
 theorem infinitely_many_primes : ∀ n : ℕ, ∃ p : ℕ, p.Prime ∧ p > n := by
   by_contra! h
