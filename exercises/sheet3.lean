@@ -56,19 +56,11 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : 
       apply Nat.dvd_mul.mp at h3
       rcases h3 with ⟨k1,hk1⟩
       rcases hk1 with ⟨k2,hk1⟩
-      have h3 : padicValNat q n ≠ 0 := by
-        refine (dvd_iff_padicValNat_ne_zero h2).mp hqn
-        exact { out := hq }
-      have hk2 : q ∣ k1 ∨ q ∣ k2 := by
-        refine Nat.Prime.dvd_or_dvd hq ?_
-        use q^(padicValNat q n-1)
-        nth_rw 1[←pow_one q]
-        rw[←pow_add q 1 ((padicValNat q n) - 1),add_comm,Nat.sub_add_cancel]
-        · exact hk1.2.2
-        exact one_le_iff_ne_zero.mpr h3
-      
-
-
+      have h4 : padicValNat q (k1*k2) = padicValNat q n := by
+        rw[hk1.2.2]
+        exact padicValNat_base_pow (Prime.one_lt hq) (padicValNat q n)
+      rw[←h4]
+    rw[hk]
 /-
 Lecture lemma 3: the chosen prime no longer divides the remainder.  The
 nonzero hypothesis is necessary: every natural number divides zero.
