@@ -64,7 +64,8 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : 
         use q^(padicValNat q n-1)
         nth_rw 1[←pow_one q]
         rw[←pow_add q 1 ((padicValNat q n) - 1),add_comm,Nat.sub_add_cancel]
-        exact hk1.2.2
+        · exact hk1.2.2
+        exact one_le_iff_ne_zero.mpr h3
       
 
 
