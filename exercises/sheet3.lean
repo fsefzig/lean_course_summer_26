@@ -1,6 +1,7 @@
 import Mathlib.Tactic
 import Mathlib.Data.Nat.Factorization.Defs
 import Mathlib.Data.Nat.MaxPowDiv
+import Mathlib.Algebra.GCDMonoid.Basic
 
 /-!
 # Exercise sheet 3: removing one prime power
@@ -164,7 +165,18 @@ We will discuss set operations during the exercise class tomorrow!
 /- Every prime dividing both `n` and `m` also divides `n + m`. -/
 theorem exercise5 (n m : ℕ) :
     (Nat.gcd n m).factorization.support ⊆ (n + m).factorization.support := by
-  sorry
+  intro p
+  simp only [support_factorization, mem_primeFactors, ne_eq, Nat.gcd_eq_zero_iff, not_and,
+    Nat.add_eq_zero_iff, and_imp]
+  intro hprime hdvd hne
+  constructor
+  · exact hprime
+  constructor
+  · refine (Nat.dvd_add_iff_right ?_).mp ?_
+    · exact Nat.dvd_trans hdvd (Nat.gcd_dvd_left n m)
+    exact Nat.dvd_trans hdvd (Nat.gcd_dvd_right n m)
+  exact hne
+
 
 /- The prime divisors of the least common multiple are exactly the prime
 divisors occurring in either number.  The nonzero assumptions exclude the
@@ -172,6 +184,22 @@ special case in which `Nat.lcm n m = 0`. -/
 theorem exercise6 {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) :
     n.factorization.support ∪ m.factorization.support =
       (Nat.lcm n m).factorization.support := by
-  sorry
+  ext p
+  constructor
+  · simp only [support_factorization, Finset.mem_union, mem_primeFactors, ne_eq,
+    Nat.lcm_eq_zero_iff, not_or]
+    rintro (⟨hprime, hdvdn,hne⟩ | ⟨hprime, hdvdm,hme⟩)
+    · refine ⟨hprime, ?_, hne, hm⟩
+      exact Nat.dvd_lcm_of_dvd_left hdvdn m
+    refine ⟨hprime, ?_, hn, hme⟩
+    exact Nat.dvd_lcm_of_dvd_right hdvdm n
+  simp only [support_factorization, mem_primeFactors, ne_eq, Nat.lcm_eq_zero_iff, not_or,
+    Finset.mem_union, and_imp]
+  intro hprime hdvdlcm hne hme
+  have hpdvdor : p ∣ n ∨ p ∣ m := by
+    exact (Prime.dvd_lcm (prime_iff.mp hprime)).mp hdvdlcm
+  rcases hpdvdor with hpdvdn | hpdvdm
+  · exact Or.inl ⟨hprime, hpdvdn, hne⟩
+  exact Or.inr ⟨hprime, hpdvdm, hme⟩
 
 end Sheet3
