@@ -39,74 +39,6 @@ Lecture lemma 2: after removing the largest power of `q`, every prime divisor of
 `q ∣ n` is the arithmetic content of saying that `q` lies in the support of
 the prime factorization of `n`.
 -/
-theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
-  simp only [snd_maxPowDvdDiv]
-  have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
-    refine Nat.eq_div_of_mul_eq_right ?_ ?_
-    · refine pow_ne_zero (padicValNat q n) ?_
-      exact Nat.Prime.ne_zero hq
-    exact pow_padicValNat_mul_divMaxPow q n
-  constructor
-  · intro h
-    by_cases h1 : p = q
-    · left
-      exact h1
-    right
-    have h2 : padicValNat p n = padicValNat p (n.divMaxPow q) := by
-      rw[h3]
-      have h4 : q^padicValNat q n ∣ n := pow_padicValNat_dvd
-      have h5 : (padicValNat p (n/q^padicValNat q n)) = padicValNat p n - padicValNat p (q^padicValNat q n) := by
-        letI : Fact (Nat.Prime p) := ⟨hp⟩
-        apply padicValNat.div_of_dvd h4
-      rw[h5]
-      have h6 : padicValNat p (q^padicValNat q n) = 0 :=  by
-        apply padicValNat.eq_zero_iff.mpr
-        right
-        right
-        by_contra
-        have h7 : p.primeFactors ⊆ (q^padicValNat q n).primeFactors := by
-          refine primeFactors_mono this ?_
-          refine pow_ne_zero (padicValNat q n) ?_
-          exact Nat.Prime.ne_zero hq
-        have h8 : p.primeFactors = {p} := Prime.primeFactors hp
-        have h9 : (q^padicValNat q n).primeFactors = {q} ∨ (q^padicValNat q n).primeFactors = ∅ := by
-          by_cases h10 : padicValNat q n ≠ 0
-          · left
-            exact primeFactors_prime_pow h10 hq
-          right
-          refine primeFactors_eq_empty.mpr ?_
-          right
-          refine Nat.pow_eq_one.mpr ?_
-          right
-          exact Function.notMem_support.mp h10
-        have h10 : p ∉ (q^padicValNat q n).primeFactors := by
-          rcases h9 with h11 | h12
-          · rw[h11]
-            exact Finset.notMem_singleton.mpr h1
-          rw[h12]
-          tauto
-        have h11 : p ∈ p.primeFactors := Prime.mem_primeFactors_self hp
-        tauto
-      rw[h6,Nat.sub_zero]
-    have h3 : n ≠ 0 → 1 ≤ padicValNat p (n.divMaxPow q) := by
-      rw[←h2]
-      letI : Fact (p.Prime) := ⟨hp⟩
-      exact fun a ↦ one_le_padicValNat_of_dvd a h
-    by_cases h4 : n ≠ 0
-    · apply h3 at h4
-      exact dvd_of_one_le_padicValNat h4
-    have h5 : n = 0 := by tauto
-    simp only [h5,divMaxPow_zero_left, dvd_zero]
-  intro h
-  rcases h with h1 | h2
-  · rw[h1]
-    exact hqn
-  rw[h3] at h2
-  have h4 : n/(q^padicValNat q n) ∣ n := by
-    refine div_dvd_of_dvd ?_
-    exact pow_padicValNat_dvd
-  exact Nat.dvd_trans h2 h4
-
 /-
 Lecture lemma 3: the chosen prime no longer divides the remainder.  The
 nonzero hypothesis is necessary: every natural number divides zero.
@@ -143,7 +75,7 @@ is the largest power of p that divides n.
 
 #check pow_dvd_iff_le_padicValNat
 
-theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) : primeExponent n p = primeExponent (remainder n q) p := by -- (hn : n ≠ 0) was unneccesary (I already proved this exercise as an intermediate step of my proof of Exercise 2)
+theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) : primeExponent n p = primeExponent (remainder n q) p := by
   simp only [fst_maxPowDvdDiv, snd_maxPowDvdDiv]
   have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
     refine Nat.eq_div_of_mul_eq_right ?_ ?_
@@ -186,6 +118,38 @@ theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) : 
     tauto
   rw[h6,Nat.sub_zero]
 
+theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
+  simp only [snd_maxPowDvdDiv]
+  constructor
+  · intro h
+    by_cases h1 : p = q
+    · left
+      exact h1
+    right
+    have h2 : padicValNat p n = padicValNat p (n.divMaxPow q) := add_right_cancel (congrFun (congrArg HAdd.hAdd (exercise4 hp hq h1)) p)
+    have h3 : n ≠ 0 → 1 ≤ padicValNat p (n.divMaxPow q) := by
+      rw[←h2]
+      letI : Fact (p.Prime) := ⟨hp⟩
+      exact fun a ↦ one_le_padicValNat_of_dvd a h
+    by_cases h4 : n ≠ 0
+    · apply h3 at h4
+      exact dvd_of_one_le_padicValNat h4
+    have h5 : n = 0 := by tauto
+    simp only [h5,divMaxPow_zero_left, dvd_zero]
+  intro h
+  rcases h with h1 | h2
+  · rw[h1]
+    exact hqn
+  have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
+    refine Nat.eq_div_of_mul_eq_right ?_ ?_
+    · refine pow_ne_zero (padicValNat q n) ?_
+      exact Nat.Prime.ne_zero hq
+    exact pow_padicValNat_mul_divMaxPow q n
+  rw[h3] at h2
+  have h4 : n/(q^padicValNat q n) ∣ n := by
+    refine div_dvd_of_dvd ?_
+    exact pow_padicValNat_dvd
+  exact Nat.dvd_trans h2 h4
 /-!
 ## Applications of prime factorization
 
