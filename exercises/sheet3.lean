@@ -41,6 +41,11 @@ the prime factorization of `n`.
 -/
 theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
   simp only [snd_maxPowDvdDiv]
+  have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
+    refine Nat.eq_div_of_mul_eq_right ?_ ?_
+    · refine pow_ne_zero (padicValNat q n) ?_
+      exact Nat.Prime.ne_zero hq
+    exact pow_padicValNat_mul_divMaxPow q n
   constructor
   · intro h
     by_cases h1 : p = q
@@ -48,11 +53,6 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : 
       exact h1
     right
     have h2 : padicValNat p n = padicValNat p (n.divMaxPow q) := by
-      have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
-        refine Nat.eq_div_of_mul_eq_right ?_ ?_
-        · refine pow_ne_zero (padicValNat q n) ?_
-          exact Nat.Prime.ne_zero hq
-        exact pow_padicValNat_mul_divMaxPow q n
       rw[h3]
       have h4 : q^padicValNat q n ∣ n := pow_padicValNat_dvd
       have h5 : (padicValNat p (n/q^padicValNat q n)) = padicValNat p n - padicValNat p (q^padicValNat q n) := by
@@ -101,11 +101,6 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) : 
   rcases h with h1 | h2
   · rw[h1]
     exact hqn
-  have h3 : n.divMaxPow q = n/(q^padicValNat q n) := by
-    refine Nat.eq_div_of_mul_eq_right ?_ ?_
-    · refine pow_ne_zero (padicValNat q n) ?_
-      exact Nat.Prime.ne_zero hq
-    exact pow_padicValNat_mul_divMaxPow q n
   rw[h3] at h2
   have h4 : n/(q^padicValNat q n) ∣ n := by
     refine div_dvd_of_dvd ?_
@@ -264,5 +259,5 @@ theorem exercise6 {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) : n.factorization.su
   · left
     exact mem_primeFactors.mpr ⟨h.1, ⟨h1, hn⟩⟩
   right
-  exact mem_primeFactors.mpr ⟨h.1, ⟨h2, hm⟩⟩+
+  exact mem_primeFactors.mpr ⟨h.1, ⟨h2, hm⟩⟩
 end Sheet3
