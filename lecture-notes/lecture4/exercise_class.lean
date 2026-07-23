@@ -1,6 +1,5 @@
 import Mathlib.Tactic.Linarith.Frontend
 import Mathlib.Data.Nat.Factorization.Defs
-
 /-
 How do define functions in lean?
 The basic syntax is as follows (this is called lambda natotation):
@@ -52,8 +51,9 @@ Note that rw[fac] only works in the induction step!
 
 lemma fac_pos : fac n > 0 := by
   induction n with
-  | zero => rw[fac]
-            exact Nat.zero_lt_one
+  | zero =>
+    rw[fac]
+    exact Nat.zero_lt_one
   | succ n ih =>
     rw[fac]
     exact Nat.mul_pos (Nat.succ_pos n) ih
@@ -86,7 +86,7 @@ example (hn : n > 0) : collatz n > 0 := by
   · rw [collatz]
     rw[if_pos h]
     obtain ⟨k, hk⟩ := h
-    sorry
+    refine Nat.div_pos_iff.mpr ?_
   rw [collatz]
   rw[if_neg h]
   simp only [gt_iff_lt, lt_add_iff_pos_left, Order.lt_add_one_iff, zero_le]
