@@ -44,5 +44,6 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
+-- Down to earth version of IsCoprime.mul_dvd
 lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 1) : a * b ∣ c := by
   sorry
