@@ -115,7 +115,7 @@ variable {α β : Type} (f : α → β)
 
 #check Function.Bijective f
 
-#check α ≃ β -- the type of equivalences between α and β
+#check α ≃ β -- the type of equivalences (bijective functions) between α and β
 
 noncomputable example (h : Function.Bijective f) : α ≃ β  := by
   exact Equiv.ofBijective f h
@@ -126,9 +126,13 @@ variable {e : α ≃ β}
 
 #check e.invFun --inverse function from β to α
 
-#check e.symm.toFun --equivalence from β to α and the turn into function. The same as e.invFun.
+#check e.symm --equivalence from β to α (given by the inverse function)
 
-#check Nat.card
+-- Finite sets have a cardinality, which is a natural number.
+
+#check Finite α -- Finite a means α is equivalent to Fin n for some n : ℕ.
+
+#check Nat.card -- Nat.card α is the cardinality of a finite type α.
 
 lemma bijective_of_injective_and_card {α β : Type} [Finite α] [Finite β] (f : α → β)
     (h : Function.Injective f) (hcard : Nat.card α = Nat.card β) : Function.Bijective f := by
@@ -138,18 +142,18 @@ end
 
 def q_res (n : ℤ) : Fin n.natAbs → ℤ_mod n := fun i => q n i.val
 
-theorem equiv_Z_range_n {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
+theorem Z_mod_n_fin_n_bijection {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
   refine ⟨?_, ?_⟩
   · sorry
   sorry
 
-noncomputable def equiv_Z_range_n' {n : ℤ} (hn : n ≠ 0) : ℤ_mod n ≃ Fin n.natAbs:= by
-  exact (Equiv.ofBijective (q_res n) (equiv_Z_range_n hn)).symm
+noncomputable def Z_mod_n_fin_n_equiv {n : ℤ} (hn : n ≠ 0) : ℤ_mod n ≃ Fin n.natAbs:= by
+  exact (Equiv.ofBijective (q_res n) (Z_mod_n_fin_n_bijection hn)).symm
 
 theorem finiteness_of_Z_mod {n : ℤ} (hn : n ≠ 0) : Finite (ℤ_mod n) := by
   apply finite_iff_exists_equiv_fin.mpr
   use n.natAbs
-  exact ⟨equiv_Z_range_n' hn⟩
+  exact ⟨Z_mod_n_fin_n_equiv hn⟩
 
 theorem chinese_remainder_theorem {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hcoprime : IsCoprime n m) :
     Function.Bijective (C n m) := by
@@ -183,11 +187,11 @@ theorem chinese_remainder_theorem {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hco
       exact q_eq.mp (congrArg Prod.snd h)
     exact IsCoprime.mul_dvd hcoprime hndvd hmdvd
   have hnmcard : Nat.card (ℤ_mod (n * m)) = (n * m).natAbs := by
-    exact Nat.card_eq_of_equiv_fin (equiv_Z_range_n' (Int.mul_ne_zero hn hm))
+    exact Nat.card_eq_of_equiv_fin (Z_mod_n_fin_n_equiv (Int.mul_ne_zero hn hm))
   have hprodcard : Nat.card (ℤ_mod n × ℤ_mod m) = n.natAbs * m.natAbs := by
     rw[Nat.card_prod]
-    rw[(Nat.card_eq_of_equiv_fin (equiv_Z_range_n' hn)),
-    (Nat.card_eq_of_equiv_fin (equiv_Z_range_n' hm))]
+    rw[(Nat.card_eq_of_equiv_fin (Z_mod_n_fin_n_equiv hn)),
+    (Nat.card_eq_of_equiv_fin (Z_mod_n_fin_n_equiv hm))]
   rw[hnmcard, hprodcard]
   exact Int.natAbs_mul n m
 
