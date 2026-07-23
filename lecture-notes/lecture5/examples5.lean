@@ -7,14 +7,11 @@ import Mathlib.Data.Int.DivMod
 Modulo calculations for integers
 -/
 
-example (n m k r : ℤ) (hn : n ≠ 0) (hr : 0 ≤ r ∧ r < n.natAbs) (h : m = n * k + r) : m % n = r := by
+lemma modulo_eq_rest (n m k r : ℤ) (hn : n ≠ 0) (hr : 0 ≤ r ∧ r < n.natAbs) (h : m = n * k + r)
+  : m % n = r := by
   apply (Int.emod_eq_iff hn).mpr
   refine ⟨hr.1, hr.2, ?_⟩
   simp only [h, sub_add_cancel_right, dvd_neg, dvd_mul_right]
-
-example (n m1 m2 r1 r2 : ℤ) (hn : n ≠ 0) (h1 : m1 % n = r1) (h2 : m2 % n = r2)
- : m1 + m2 % n = (r1 + r2) % n := sorry
-
 
 namespace MyQuotient
 
@@ -133,8 +130,6 @@ variable {e : α ≃ β}
 
 #check Nat.card
 
-#check Nat.bijective_iff_injective_and_card
-
 lemma bijective_of_injective_and_card {α β : Type} [Finite α] [Finite β] (f : α → β)
     (h : Function.Injective f) (hcard : Nat.card α = Nat.card β) : Function.Bijective f := by
   exact (Nat.bijective_iff_injective_and_card f).mpr ⟨h, hcard⟩
@@ -171,32 +166,14 @@ theorem chinese_remainder_theorem {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hco
     rw[← h1,← h2]
     apply Quotient.eq.mpr
     change n * m ∣ (x1 - x2)
-    have hCx1 : (C_dvd (Int.dvd_mul_right n m) m1, C_dvd (Int.dvd_mul_left n m) m1) = (q n x1, q m x1) := by
-        refine Prod.mk_inj.mpr ?_
-        constructor
-        · exact
-          (Eq.to_iff
-                (congrFun (congrArg Eq (congrArg (C_dvd (Int.dvd_mul_right n m)) (id (Eq.symm h1))))
-                  (q n x1))).mpr
-            rfl
-        exact
-          (Eq.to_iff
-                (congrFun (congrArg Eq (congrArg (C_dvd (Int.dvd_mul_left n m)) (id (Eq.symm h1))))
-                  (q m x1))).mpr
-            rfl
-    have hCx2 : (C_dvd (Int.dvd_mul_right n m) m2, C_dvd (Int.dvd_mul_left n m) m2) = (q n x2, q m x2) := by
-      refine Prod.mk_inj.mpr ?_
-      constructor
-      · exact
-        (Eq.to_iff
-              (congrFun (congrArg Eq (congrArg (C_dvd (Int.dvd_mul_right n m)) (id (Eq.symm h2))))
-                (q n x2))).mpr
-          rfl
-      exact
-        (Eq.to_iff
-              (congrFun (congrArg Eq (congrArg (C_dvd (Int.dvd_mul_left n m)) (id (Eq.symm h2))))
-                (q m x2))).mpr
-          rfl
+    have hCx1 : (C_dvd (Int.dvd_mul_right n m) m1, C_dvd (Int.dvd_mul_left n m) m1)
+    = (q n x1, q m x1) := by
+      rw [← h1]
+      rfl
+    have hCx2 : (C_dvd (Int.dvd_mul_right n m) m2, C_dvd (Int.dvd_mul_left n m) m2)
+    = (q n x2, q m x2) := by
+      rw [← h2]
+      rfl
     simp only [C, hCx1, hCx2] at h
     have hndvd : n ∣ (x1 - x2) := by
       change x1 ∼[n] x2
@@ -205,13 +182,13 @@ theorem chinese_remainder_theorem {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hco
       change x1 ∼[m] x2
       exact q_eq.mp (congrArg Prod.snd h)
     exact IsCoprime.mul_dvd hcoprime hndvd hmdvd
-  have hprodcard : Nat.card (ℤ_mod (n * m)) = (n * m).natAbs := by
+  have hnmcard : Nat.card (ℤ_mod (n * m)) = (n * m).natAbs := by
     exact Nat.card_eq_of_equiv_fin (equiv_Z_range_n' (Int.mul_ne_zero hn hm))
-  have hcard : Nat.card (ℤ_mod n × ℤ_mod m) = n.natAbs * m.natAbs := by
+  have hprodcard : Nat.card (ℤ_mod n × ℤ_mod m) = n.natAbs * m.natAbs := by
     rw[Nat.card_prod]
     rw[(Nat.card_eq_of_equiv_fin (equiv_Z_range_n' hn)),
     (Nat.card_eq_of_equiv_fin (equiv_Z_range_n' hm))]
-  rw[hprodcard, hcard]
+  rw[hnmcard, hprodcard]
   exact Int.natAbs_mul n m
 
 end MyQuotient
