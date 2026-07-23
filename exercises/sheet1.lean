@@ -20,13 +20,6 @@ theorem exercise1 : (¬(P ∧ Q) ↔ ¬ P ∨ ¬ Q) := by
     | inr hnq => exact (hnq hpq.right)
 
 theorem exercise2 (h : P ∨ Q) (hp : ¬ P) : Q := by
-  cases h with
-  | inl hp' =>
-    exact absurd hp' hp
-  | inr hq =>
-    exact hq
-
-theorem exercise2' (h : P ∨ Q) (hp : ¬ P) : Q := by
   rcases h with hp' | hq
   · contradiction
   · exact hq
