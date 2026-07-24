@@ -45,6 +45,7 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
   constructor
   · intro h
     set k := remainder n q with hk
+
     sorry
   · intro h
     sorry
@@ -131,23 +132,41 @@ theorem exercise5 (n m : ℕ) :
     rw [h₁, h₂]
     simp
 
+#check Or.resolve_right
+#check Nat.prime_dvd_prime_iff_eq
+
+#check Coprime
+#check Prime.coprime_iff_not_dvd
+
 /- The prime divisors of the least common multiple are exactly the prime
 divisors occurring in either number.  The nonzero assumptions exclude the
 special case in which `Nat.lcm n m = 0`. -/
 theorem exercise6 {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) :
     n.factorization.support ∪ m.factorization.support =
       (Nat.lcm n m).factorization.support := by
-  ext a
+  ext _
   simp only [support_factorization, Finset.mem_union, mem_primeFactors, ne_eq, Nat.lcm_eq_zero_iff,
     not_or]
   constructor
   · intro h
-    sorry
+    cases h with
+    | inl hl =>
+      refine ⟨hl.1, ⟨?_, ⟨hl.2.2, hm⟩⟩⟩
+      exact Nat.dvd_lcm_of_dvd_left hl.2.1 m
+    | inr hr =>
+      refine ⟨hr.1, ⟨?_, ⟨hn, hr.2.2⟩⟩⟩
+      exact Nat.dvd_lcm_of_dvd_right hr.2.1 n
   · intro h
-    sorry
+    cases Prime.dvd_or_dvd_of_dvd_lcm (prime_iff.mp h.1) h.2.1 with
+    | inl hl =>
+      exact Or.inl ⟨h.1, ⟨hl, hn⟩⟩
+    | inr hr =>
+      exact Or.inr ⟨h.1, ⟨hr, hm⟩⟩
 
-#check Finsupp
+#check Coprime.lcm_eq_mul
 #check Finsupp.prod
+#check Nat.irreducible_iff_nat_prime
+#check _root_.Prime
 
 /-
 Nat.factorization 10 : ℕ →₀ ℕ

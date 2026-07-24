@@ -118,6 +118,7 @@ def A (P : α → Prop) := { x : α | P x } --subtype of α defined by P
 
 theorem test (n : ℕ) (S : Set ℕ) : n ∈ S := by
   #check S n
+  sorry
 
 /-
 You may notice that the above notation looks very similar to the set builder notation, and in fact,
@@ -173,6 +174,7 @@ def TypeOfEvenNums : Type := {n : ℕ // IsEven n}
 
 example (x : TypeOfEvenNums) : 2=2 := by
   obtain ⟨n, hn⟩ := x
+  sorry
 
 #check Coe
 
