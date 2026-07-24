@@ -18,7 +18,7 @@ namespace MyQuotient
 @[simp]
 def mod_relation (n : ℤ) : ℤ → ℤ → Prop := fun m1 m2 => n ∣ m1 - m2
 
-scoped notation:50 m1 " ∼[" n "] " m2 => mod_relation n m1 m2
+scoped notation m1 " ∼[" n "] " m2 => mod_relation n m1 m2
 
 example (n m1 m2 : ℤ) : (m1 ∼[n] m2) ↔ n ∣ m1 - m2 := by
   rfl
@@ -71,7 +71,7 @@ example (n m : ℤ) : Quotient.mk (ℤ_mod_setoid n) m = (⟦m⟧ : ℤ_mod n) :
 @[simp]
 def q (n : ℤ) : ℤ → ℤ_mod n := Quotient.mk (ℤ_mod_setoid n)
 
-lemma q_eq {n m1 m2 : ℤ} : (q n m1) = q n m2 ↔ (m1 ∼[n] m2) := by
+lemma q_equality {n m1 m2 : ℤ} : (q n m1) = q n m2 ↔ (m1 ∼[n] m2) := by
   simp only [q, ℤ_mod_setoid, mod_relation]
   exact Quotient.eq
 
@@ -89,7 +89,7 @@ For this we will use the Quotient lift property.
 def C_dvd {n1 n2 : ℤ} (hdvd : n1 ∣ n2) : ℤ_mod (n2) → ℤ_mod n1 := by
   refine Quotient.lift (fun m => q n1 m) ?_
   intro m1 m2 h
-  simp only [q_eq, mod_relation] at *
+  simp only [q_equality, mod_relation] at *
   exact dvd_trans hdvd h
 
 def C (n m : ℤ) : ℤ_mod (n * m) → ℤ_mod n × ℤ_mod m := by
@@ -181,10 +181,10 @@ theorem chinese_remainder_theorem {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hco
     simp only [C, hCx1, hCx2] at h
     have hndvd : n ∣ (x1 - x2) := by
       change x1 ∼[n] x2
-      exact q_eq.mp (congrArg Prod.fst h)
+      exact q_equality.mp (congrArg Prod.fst h)
     have hmdvd : m ∣ (x1 - x2) := by
       change x1 ∼[m] x2
-      exact q_eq.mp (congrArg Prod.snd h)
+      exact q_equality.mp (congrArg Prod.snd h)
     exact IsCoprime.mul_dvd hcoprime hndvd hmdvd
   have hnmcard : Nat.card (ℤ_mod (n * m)) = (n * m).natAbs := by
     exact Nat.card_eq_of_equiv_fin (Z_mod_n_fin_n_equiv (Int.mul_ne_zero hn hm))
