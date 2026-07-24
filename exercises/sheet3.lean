@@ -44,11 +44,22 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
     p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
   constructor
   · intro h
-    set k := remainder n q with hk
-
-    sorry
-  · intro h
-    sorry
+    by_cases hqeq : p = q
+    · exact Or.inl hqeq
+    · rw [product_of_primeExponent n q] at h
+      apply Nat.Prime.dvd_or_dvd hp at h
+      rcases h with hpdvdq | hqdvdr
+      · apply Nat.Prime.dvd_of_dvd_pow hp at hpdvdq
+        have hpq : p = q := by exact (Nat.prime_dvd_prime_iff_eq hp hq).mp hpdvdq
+        contradiction
+      · exact Or.inr hqdvdr
+  rintro (heq | hdiv)
+  · rw[heq]
+    exact hqn
+  obtain ⟨k, hk⟩ := hdiv
+  rw [product_of_primeExponent n q, hk]
+  use q ^ primeExponent n q * k
+  group
 #check Subtype
 
 /-
@@ -94,7 +105,40 @@ is the largest power of p that divides n.
 theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
     (hn : n ≠ 0) :
     primeExponent n p = primeExponent (remainder n q) p := by
-  sorry
+  by_cases hpdvd: p ∣ n
+  · by_cases hqdvd : q ∣ n
+    · have hmul : primeExponent n p =
+        primeExponent (q ^ primeExponent n q) p + primeExponent (remainder n q) p := by
+        nth_rewrite 1 [product_of_primeExponent n q]
+        refine primeExponent_mul ?_ ?_ hp
+        · apply pow_ne_zero
+          exact Nat.Prime.ne_zero hq
+        exact Nat.ne_zero_of_mul_ne_zero_right (product_of_primeExponent n q ▸ hn)
+      have hzero : primeExponent (q ^ primeExponent n q) p = 0 := by
+        simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
+        right
+        right
+        intro h
+        apply Nat.Prime.dvd_of_dvd_pow hp at h
+        exact hpq ((Nat.prime_dvd_prime_iff_eq hp hq).mp h)
+      rw[hmul , hzero]
+      exact Nat.zero_add (primeExponent (remainder n q) p)
+    have hrem : remainder n q = n := by
+      rw[remainder, maxPowDvdDiv_of_not_dvd hqdvd]
+    rw[hrem]
+  have hlhs : primeExponent n p = 0 := by
+    simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
+    exact Or.inr (Or.inr hpdvd)
+  have hpndvdr : ¬(p ∣ remainder n q) := by
+    intro h
+    have hdvd : p ∣ n := by
+      rw[product_of_primeExponent n q]
+      exact Nat.dvd_mul_left_of_dvd h (q ^ primeExponent n q)
+    contradiction
+  have hrhs : primeExponent (remainder n q) p = 0 := by
+    simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
+    exact Or.inr (Or.inr hpndvdr)
+  rw[hlhs, hrhs]
 
 /-!
 ## Applications of prime factorization
