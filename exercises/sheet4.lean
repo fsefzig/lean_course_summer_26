@@ -7,7 +7,8 @@ open MyQuotient
 lemma exercise0 {n m1 m2 : ℤ} (hn : n ≠ 0) : (q n m1) = q n m2 ↔ (m1 % n = m2 % n) := by
   sorry
 
-/- Look at exercise_class.lean in lecture-notes/lecture4 for the setbuilder notation.
+/-
+Look at exercise_class.lean in lecture-notes/lecture4 for the setbuilder notation.
 Use the properties of equivalence relations to prove the following lemma.
 You can access them with `hR.refl`, `hR.symm` and `hR.trans`.
 -/
@@ -38,7 +39,7 @@ lemma f_surjective_of_right_inverse {α β : Type} (f : α → β) (g : β → �
 -- Prove that the quotient map q : ℤ → ℤ/n is restricted to Fin n = {0, 1, …, n-1} is a bijection.
 -- Hint: You can prove this directly.
 theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
-  refine ⟨?_, ?_⟩
+  constructor
   · sorry
   sorry
 

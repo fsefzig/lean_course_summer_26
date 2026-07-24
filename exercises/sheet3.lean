@@ -73,7 +73,7 @@ theorem exercise3 {p n : ℕ} (hp : p.Prime) (hn : n ≠ 0) :
     ¬p ∣ remainder n p := by
     intro h
     obtain ⟨k, hk⟩ := h
-    have hdvd : p ^ ((primeExponent n p) + 1)  ∣ n := by
+    have hdvd : p ^ ((primeExponent n p) + 1) ∣ n := by
       use k
       rw [pow_succ, mul_assoc, ← hk]
       exact product_of_primeExponent n p
@@ -117,12 +117,11 @@ theorem exercise4 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
           exact Nat.Prime.ne_zero hq
         exact Nat.ne_zero_of_mul_ne_zero_right (product_of_primeExponent n q ▸ hn)
       have hzero : primeExponent (q ^ primeExponent n q) p = 0 := by
-        simp only [fst_maxPowDvdDiv, padicValNat.eq_zero_iff]
-        right
-        right
+        apply primeExponent_coprime
         intro h
-        apply Nat.Prime.dvd_of_dvd_pow hp at h
-        exact hpq ((Nat.prime_dvd_prime_iff_eq hp hq).mp h)
+        have hpq' : p = q := by
+          exact (Nat.prime_dvd_prime_iff_eq hp hq).mp (Nat.Prime.dvd_of_dvd_pow hp h)
+        contradiction
       rw[hmul , hzero]
       exact Nat.zero_add (primeExponent (remainder n q) p)
     have hrem : remainder n q = n := by
