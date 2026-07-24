@@ -40,7 +40,7 @@ theorem mod_equivalence (n : ℤ) : Equivalence (mod_relation n) where
     exact dvd_sub_comm.mp h
   trans := by
     intro m1 m2 m3 h12 h23
-    simp only [mod_relation] at *
+    simp only [mod_relation] at * --at * means it does it everywhere
     have hdiv : m1 - m3 = (m1 - m2) + (m2 - m3) := by
       exact Eq.symm (sub_add_sub_cancel m1 m2 m3)
     rw[hdiv]
