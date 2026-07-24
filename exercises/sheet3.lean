@@ -48,33 +48,41 @@ the prime factorization of `n`.
 theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
     p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
   constructor
-  · intro hpn
+  · intro h
     by_cases hpq : p = q
     · exact Or.inl hpq
     · right
-      have hcoprime : p.Coprime q := by
+      have h_p_coprime_q : p.Coprime q := by
         exact (Nat.coprime_primes hp hq).2 hpq
-      have hcoprimePow :
+      have h_p_coprime_q_pow :
           p.Coprime (q ^ primeExponent n q) := by
-        exact hcoprime.pow_right (primeExponent n q)
-      apply hcoprimePow.dvd_of_dvd_mul_right
-      have hproduct :
+        exact h_p_coprime_q.pow_right (primeExponent n q)
+      apply h_p_coprime_q_pow.dvd_of_dvd_mul_right
+      have h_mul :
           q ^ primeExponent n q * remainder n q = n := by
-        symm
-        exact product_of_primeExponent n q
-      rw [mul_comm, hproduct]
-      exact hpn
-  · rintro (hpq | hprem)
-    · rw [hpq]
+        unfold remainder primeExponent
+        rw [Nat.snd_maxPowDvdDiv, Nat.fst_maxPowDvdDiv]
+        rw [mul_comm]
+        exact Nat.divMaxPow_mul_pow_padicValNat q n
+      rw [mul_comm, h_mul]
+      exact h
+
+  · intro h
+    rcases h with hpq | hprem
+    · symm at hpq
+      rw [hpq] at hqn
       exact hqn
     · apply Nat.dvd_trans hprem
-      have hproduct :
-          n = q ^ primeExponent n q * remainder n q := by
-        exact product_of_primeExponent n q
-      rw [hproduct, mul_comm]
-      exact Nat.dvd_mul_right
+      have h_mul :
+          n = remainder n q * q ^ primeExponent n q := by
+        unfold remainder primeExponent
+        rw [Nat.snd_maxPowDvdDiv, Nat.fst_maxPowDvdDiv]
+        symm
+        exact Nat.divMaxPow_mul_pow_padicValNat q n
+      nth_rw 2 [h_mul]
+      exact ⟨q ^ primeExponent n q, rfl⟩
 
- /--/     
+ /-     
 Lecture lemma 3: the chosen prime no longer divides the remainder.  The
 nonzero hypothesis is necessary: every natural number divides zero.
 -/
