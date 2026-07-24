@@ -36,8 +36,8 @@ lemma product_of_primeExponent (n p : ℕ) :
 
 theorem exercise1 (p n : ℕ) :
     p ^ primeExponent n p ∣ n := by
-  unfold primeExponent
-  exact Nat.maxPowDiv.pow_dvd
+  use remainder n p
+  exact product_of_primeExponent n p
 
 /-
 Lecture lemma 2: after removing the largest power of `q`, every prime divisor of
@@ -49,40 +49,23 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
     p ∣ n ↔ p = q ∨ p ∣ remainder n q := by
   constructor
   · intro h
-    by_cases hpq : p = q
-    · exact Or.inl hpq
-    · right
-      have h_p_coprime_q : p.Coprime q := by
-        exact (Nat.coprime_primes hp hq).2 hpq
-      have h_p_coprime_q_pow :
-          p.Coprime (q ^ primeExponent n q) := by
-        exact h_p_coprime_q.pow_right (primeExponent n q)
-      apply h_p_coprime_q_pow.dvd_of_dvd_mul_right
-      have h_mul :
-          q ^ primeExponent n q * remainder n q = n := by
-        unfold remainder primeExponent
-        rw [Nat.snd_maxPowDvdDiv, Nat.fst_maxPowDvdDiv]
-        rw [mul_comm]
-        exact Nat.divMaxPow_mul_pow_padicValNat q n
-      rw [mul_comm, h_mul]
-      exact h
-
-  · intro h
-    rcases h with hpq | hprem
-    · symm at hpq
-      rw [hpq] at hqn
+    by_cases heq : p = q
+    · exact Or.inl heq
+    · rw [product_of_primeExponent n q] at h
+      apply Nat.Prime.dvd_or_dvd hp at h
+      rcases h with hpdvdq | hpdvdr
+      · apply Nat.Prime.dvd_of_dvd_pow hp at hpdvdq
+        have hpq : p = q := by
+          exact (Nat.prime_dvd_prime_iff_eq hp hq).mp hpdvdq
+        contradiction
+      · exact Or.inr hpdvdr
+  · rintro (heq | hdiv)
+    · rw [heq]
       exact hqn
-    · apply Nat.dvd_trans hprem
-      have h_mul :
-          n = remainder n q * q ^ primeExponent n q := by
-        unfold remainder primeExponent
-        rw [Nat.snd_maxPowDvdDiv, Nat.fst_maxPowDvdDiv]
-        symm
-        exact Nat.divMaxPow_mul_pow_padicValNat q n
-      nth_rw 2 [h_mul]
-      exact ⟨q ^ primeExponent n q, rfl⟩
+    · rw [product_of_primeExponent n q, mul_comm]
+      exact dvd_mul_of_dvd_left hdiv _
 
- /-     
+ /-
 Lecture lemma 3: the chosen prime no longer divides the remainder.  The
 nonzero hypothesis is necessary: every natural number divides zero.
 -/
