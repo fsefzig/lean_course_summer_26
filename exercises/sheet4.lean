@@ -132,7 +132,6 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
     exact Int.ofNat_inj.mp hk
   intro x1
   obtain ⟨x2,h⟩ := Quotient.exists_rep x1
-  dsimp only [ℤ_mod, ℤ_mod_setoid, q_res, q]
   have h1 : ∃ k r : ℤ, 0 ≤ r ∧ r < n.natAbs ∧  x2 = n.natAbs*k + r := by
     use x2/n.natAbs
     use (x2 % n.natAbs)
@@ -147,12 +146,27 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
     exact Eq.symm (Int.mul_ediv_add_emod x2 ↑n.natAbs)
   rcases h1 with ⟨k,hk⟩
   rcases hk with ⟨r,hr⟩
-  have r.toNat : Fin n.natAbs := by
-    refine Fin.Internal.ofNat n.natAbs ?_ ?_
-    · exact Int.natAbs_pos.mpr hn
-    exact USize.size
-
-
+  have h1 : r.toNat < n.natAbs := by
+    refine (Int.toNat_lt ?_).mpr ?_
+    · apply hr.1
+    apply hr.2.1
+  let r1 : Fin n.natAbs := ⟨r.toNat,h1⟩
+  use r1
+  have hr :  x2 % n = ((r1 : ℕ) : ℤ) % n := by
+    have hy : max r 0 = r := by
+      refine Int.max_eq_left ?_
+      exact hr.1
+    simp only [hr, Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, Int.ofNat_toNat, sup_of_le_left, r1]
+    have hn : n ∣ |n| * k := by
+      refine Int.dvd_mul_of_dvd_left ?_
+      exact self_dvd_abs n
+    refine Int.emod_eq_emod_iff_emod_sub_eq_zero.mpr ?_
+    simp only [add_sub_cancel_right, EuclideanDomain.mod_eq_zero]
+    exact hn
+  simp only [q_res]
+  rw[←h]
+  apply exercise0.mpr
+  exact hr.symm
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 1) : a * b ∣ c := by
