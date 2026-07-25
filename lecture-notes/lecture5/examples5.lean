@@ -18,7 +18,17 @@ namespace MyQuotient
 @[simp]
 def mod_relation (n : ℤ) : ℤ → ℤ → Prop := fun m1 m2 => n ∣ m1 - m2
 
+
+#check Add
 scoped notation m1 " ∼[" n "] " m2 => mod_relation n m1 m2
+
+#check 14 ∼[3] 8
+
+#check Equivalence
+
+#check Quot.lift
+#check Quot
+
 
 example (n m1 m2 : ℤ) : (m1 ∼[n] m2) ↔ n ∣ m1 - m2 := by
   rfl
@@ -27,7 +37,7 @@ example (n m1 m2 : ℤ) : (m1 ∼[n] m2) ↔ n ∣ m1 - m2 := by
 Equivalence relations are defined in the library. We prove that mod_relation n is an equivalence.
 -/
 
-#check Equivalence
+#check (refl 1 : Eq 1 1)
 
 @[simp]
 theorem mod_equivalence (n : ℤ) : Equivalence (mod_relation n) where
@@ -102,8 +112,10 @@ theorem chinese_remainder_theorem' {n m : ℤ} (hn : n ≠ 0) (hm : m ≠ 0) (hc
   sorry
 
 /-
-Interlude: Functions
+Interlude: Functions ¬ ∘
 -/
+
+theorem contrapos {p q : Prop} (h : p -> q) : ¬q -> ¬p := fun nq => nq ∘ h
 
 section
 
@@ -143,8 +155,10 @@ end
 def q_res (n : ℤ) : Fin n.natAbs → ℤ_mod n := fun i => q n i.val
 
 theorem Z_mod_n_fin_n_bijection {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
-  refine ⟨?_, ?_⟩
-  · sorry
+  refine ⟨?_, ?_⟩ -- constructor
+  · unfold Function.Injective q_res q
+    intro A B h
+    sorry
   sorry
 
 noncomputable def Z_mod_n_fin_n_equiv {n : ℤ} (hn : n ≠ 0) : ℤ_mod n ≃ Fin n.natAbs:= by
