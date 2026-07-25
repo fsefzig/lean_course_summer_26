@@ -106,11 +106,14 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
     simp
   refine f_surjective_of_right_inverse (q_res n) (q_res_inv n hn) ?_
   intro b
-  unfold q_res_inv q_res
-  simp only [ℤ_mod, ℤ_mod_setoid, q]
-  trace_state
-  sorry
-
+  refine Quotient.recOn b ?_ (fun a b p => rfl)
+  intro a
+  unfold q_res q_res_inv
+  simp only [ℤ_mod, ℤ_mod_setoid, q, Quotient.lift_mk, Nat.cast_natAbs, Int.cast_abs, Int.cast_eq]
+  apply Quotient.sound
+  change n ∣ |a%n| - a
+  rw [abs_of_nonneg <| Int.emod_nonneg a hn]
+  exact Int.dvd_emod_sub_self
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
