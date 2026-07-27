@@ -5,7 +5,28 @@ open MyQuotient
 -- Two integers define the same class modulo `n` exactly when they have the same remainder modulo `n`.
 -- Hint: use `modulo_eq_rest` from the lecture notes.
 lemma exercise0 {n m1 m2 : ℤ} (hn : n ≠ 0) : (q n m1) = q n m2 ↔ (m1 % n = m2 % n) := by
-  sorry
+  constructor
+  · intro hq
+    obtain ⟨k, hk⟩ := q_equality.mp hq
+    have hr : 0 ≤ m2 % n ∧ m2 % n < n.natAbs := by
+      exact ⟨Int.emod_nonneg m2 hn, Int.emod_lt m2 hn⟩
+    have hm2 : m2 = n * (m2 / n) + m2 % n := by
+      exact (Int.mul_ediv_add_emod m2 n).symm
+    have hm1 : m1 = n * (k + m2 / n) + m2 % n := by
+      calc
+        m1 = n * k + m2 := by omega
+        _ = n * k + (n * (m2 / n) + m2 % n) := by rw [← hm2]
+        _ = n * (k + m2 / n) + m2 % n := by ring
+    exact modulo_eq_rest n m1 (k + m2 / n) (m2 % n) hn hr hm1
+  · intro hmod
+    apply q_equality.mpr
+    change n ∣ m1 - m2
+    use m1 / n - m2 / n
+    calc
+      m1 - m2 =
+          (n * (m1 / n) + m1 % n) - (n * (m2 / n) + m2 % n) := by
+            rw [Int.mul_ediv_add_emod, Int.mul_ediv_add_emod]
+      _ = n * (m1 / n - m2 / n) := by rw [hmod]; ring
 
 /- Look at exercise_class.lean in LectureNotes/lecture4 for the setbuilder notation.
 Use the properties of equivalence relations to prove the following lemma.
@@ -58,67 +79,24 @@ lemma f_surjective_of_right_inverse {α β : Type} (f : α → β) (g : β → �
 theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
   constructor
   · intro x y hxy
-    have hdvd : n ∣ x - y := by
-      exact Quotient.exact hxy
-    have habs : ((x: ℤ) - (y: ℤ)).natAbs < n.natAbs := by
+    have hdvd : n ∣ (x : ℤ) - (y : ℤ) := Quotient.exact hxy
+    have habs : ((x : ℤ) - (y : ℤ)).natAbs < n.natAbs := by
       omega
-    apply Int.natAbs_dvd_natAbs.mpr at hdvd
-    have h0 : (x - (y : ℤ)).natAbs = 0 := by
-      exact Nat.eq_zero_of_dvd_of_lt hdvd habs
+    have h0 : ((x : ℤ) - (y : ℤ)).natAbs = 0 := by
+      exact Nat.eq_zero_of_dvd_of_lt (Int.natAbs_dvd_natAbs.mpr hdvd) habs
     omega
-  intro x
-  obtain ⟨m, hm⟩ := Quotient.exists_rep x
-  have hr : m.natAbs % n.natAbs < n.natAbs := by
-    apply Nat.mod_lt
-    exact Int.natAbs_pos.mpr hn
-  by_cases h : m ≥ 0
-  · use ⟨m.natAbs % n.natAbs, hr⟩
-    simp only [ℤ_mod, ℤ_mod_setoid, q_res, q, Int.natCast_emod, Nat.cast_natAbs, Int.cast_abs,
-      Int.cast_eq, Int.emod_abs]
-    rw[← hm]
+  · intro x
+    obtain ⟨m, hm⟩ := Quotient.exists_rep x
+    have hr0 : 0 ≤ m % n := Int.emod_nonneg m hn
+    have hrlt : m % n < (n.natAbs : ℤ) := Int.emod_lt m hn
+    have hfin : (m % n).toNat < n.natAbs := by
+      omega
+    use ⟨(m % n).toNat, hfin⟩
+    rw [← hm]
     apply Quotient.eq.mpr
-    simp only [mod_relation]
-    have habs : |m| = m := by exact abs_of_nonneg h
-    rw[habs]
+    change n ∣ ((m % n).toNat : ℤ) - m
+    rw [Int.toNat_of_nonneg hr0]
     exact Int.dvd_emod_sub_self
-  by_cases hrzero : m.natAbs % n.natAbs = 0
-  · use ⟨0, by omega⟩
-    simp only [ℤ_mod, ℤ_mod_setoid, q_res, q, CharP.cast_eq_zero]
-    rw[← hm]
-    apply Quotient.eq.mpr
-    simp only [mod_relation, zero_sub, dvd_neg]
-    apply Int.natAbs_dvd_natAbs.mp
-    exact Nat.dvd_of_mod_eq_zero hrzero
-  use ⟨n.natAbs - m.natAbs % n.natAbs, by omega⟩
-  rw[← hm]
-  simp only [ℤ_mod, ℤ_mod_setoid, q_res, q]
-  apply Quotient.eq.mpr
-  simp only [mod_relation]
-  rw[Nat.mod_def]
-  have hm : m = -m.natAbs := by
-    push Not at h
-    simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq]
-    exact Int.eq_neg_comm.mp (abs_of_neg h)
-  --rw[hm]
-  --group
-  --simp
-  by_cases hn0 : 0 ≤ n
-  · have hnabs : n.natAbs = n := by
-      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, abs_eq_self]
-      exact hn0
-    use 1 - (m.natAbs / n)
-    apply Eq.symm
-    simp
-    calc n * (1 - |m| / n) = n.natAbs - n.natAbs * (|m| / n.natAbs) := by rw[← hnabs]; simp; group
-    _ = n.natAbs - (-m.natAbs + m.natAbs + n.natAbs * (|m| / n.natAbs)) := by group
-    _ = n.natAbs + m.natAbs -(m.natAbs + n.natAbs * (|m| / n.natAbs)) := by group
-    _ = n.natAbs + m.natAbs - (m.natAbs + n.natAbs * (m.natAbs / n.natAbs)) := by
-      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, ]
-    _ = ↑(n.natAbs - (m.natAbs - n.natAbs * (m.natAbs / n.natAbs))) + m.natAbs := by sorry_nf
-    _ =↑(n.natAbs - (m.natAbs - n.natAbs * (m.natAbs / n.natAbs))) - m := by
-      rw[hm]
-      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, Int.natAbs_neg, abs_abs,
-        sub_neg_eq_add]
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
