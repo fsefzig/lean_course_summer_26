@@ -1,4 +1,4 @@
-import lecture5.examples5
+import LectureNotes.lecture5.examples5
 
 open MyQuotient
 
@@ -26,7 +26,7 @@ lemma exercise0 {n m1 m2 : ℤ} : (q n m1) = q n m2 ↔ (m1 % n = m2 % n) := by
   change n ∣ m1 - m2
   exact Int.dvd_sub_iff_emod_eq_emod_of_ne_zero |>.mpr h
 
-/- Look at exercise_class.lean in lecture-notes/lecture4 for the setbuilder notation.
+/- Look at exercise_class.lean in LectureNotes/lecture4 for the setbuilder notation.
 Use the properties of equivalence relations to prove the following lemma.
 You can access them with `hR.refl`, `hR.symm` and `hR.trans`.
 -/
