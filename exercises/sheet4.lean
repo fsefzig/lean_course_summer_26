@@ -182,40 +182,54 @@ lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 
   by_cases! h4 : c = 0
   · rw[h4]
     exact Nat.dvd_zero (a * b)
+  by_cases! hb : b = 0
+  · rw[hb] at h2
+    rcases h2 with ⟨l,hl⟩
+    rw[zero_mul] at hl
+    contradiction
   rw[hk] at h2
-  have h5 : ∀ p ∈ b.primeFactors, p^(padicValNat p b) ∣ k := by
+  have h5 : ∀ p, p.Prime → p^(padicValNat p b) ∣ k := by
     intro p hp
-    by_cases h : p ∣ a
-    · apply Nat.mem_primeFactors.mp at hp
-      have h5 : p ≤ a.gcd b := by
-        rcases Nat.dvd_gcd h hp.2.1 with ⟨k,hk⟩
-        by_cases! h : k = 0
-        · simp only [h, mul_zero] at hk
-          rw[hk] at h3
-          contradiction
-        calc
-        p ≤ p * k := by
-          refine Nat.le_mul_of_pos_right p ?_
-          omega
-        _ = a.gcd b := by omega
-      rw[h3] at h5
-      have h6 : ¬ p ≤ 1 := by
-        refine Nat.not_le_of_gt ?_
-        exact Nat.Prime.one_lt hp.1
-      contradiction
-    rw[hk] at h4
-    have h2 : padicValNat p b ≤ padicValNat p a + padicValNat p k := by
-      letI : Fact (p.Prime):= ⟨(Nat.mem_primeFactors.mp hp).1⟩
-      rw[←padicValNat.mul]
-      · refine padicRule p ⟨(Nat.mem_primeFactors.mp hp).1,⟨h2,?_⟩⟩
-        rw[←hk]
-        exact Ne.symm (ne_of_ne_of_eq (Ne.symm h4) (Eq.symm hk))
-      · exact Nat.ne_zero_of_mul_ne_zero_left h4
+    by_cases h1 : p ∣ b
+    · by_cases h : p ∣ a
+      · have h5 : p ≤ a.gcd b := by
+          rcases Nat.dvd_gcd h h1 with ⟨l,hl⟩
+          by_cases! h : l = 0
+          · simp only [h, mul_zero] at hl
+            rw[hl] at h3
+            contradiction
+          calc
+          p ≤ p * l := by
+            refine Nat.le_mul_of_pos_right p ?_
+            omega
+          _ = a.gcd b := by omega
+        rw[h3] at h5
+        have h6 : ¬ p ≤ 1 := by
+          refine Nat.not_le_of_gt ?_
+          exact Nat.Prime.one_lt hp
+        contradiction
+      rw[hk] at h4
+      have h2 : padicValNat p b ≤ padicValNat p a + padicValNat p k := by
+        letI : Fact (p.Prime):= ⟨hp⟩
+        rw[←padicValNat.mul]
+        · refine padicRule p ⟨hp,⟨h2,?_⟩⟩
+          rw[←hk]
+          exact Ne.symm (ne_of_ne_of_eq (Ne.symm h4) (Eq.symm hk))
+        · exact Nat.ne_zero_of_mul_ne_zero_left h4
+        exact Nat.ne_zero_of_mul_ne_zero_right h4
+      rw[padicValNat.eq_zero_of_not_dvd h,zero_add] at h2
+      refine (Nat.pow_dvd_iff_le_padicValNat ?_ ?_).mpr h2
+      · exact hp.prime.ne_one
       exact Nat.ne_zero_of_mul_ne_zero_right h4
-    rw[padicValNat.eq_zero_of_not_dvd h,zero_add] at h2
-    refine (Nat.pow_dvd_iff_le_padicValNat ?_ ?_).mpr h2
-    · exact (Nat.mem_primeFactors.mp hp).1.prime.ne_one
-    exact Nat.ne_zero_of_mul_ne_zero_right h4
-  have h6 : b ∣ k := by
+    simp only [padicValNat.eq_zero_of_not_dvd h1, pow_zero, isUnit_iff_eq_one, IsUnit.dvd]
+  have h6 : b ∣ k:= by
     apply (Nat.dvd_iff_prime_pow_dvd_dvd k b).mpr
     intro p k1 h h1
+    have h2 : k1 ≤ padicValNat p b := by
+      refine (Nat.pow_dvd_iff_le_padicValNat ?_ ?_).mp h1
+      · exact Nat.Prime.ne_one h
+      exact hb
+    exact Nat.pow_dvd_of_le_of_pow_dvd h2 (h5 p h)
+  rcases h6 with ⟨l,hl⟩
+  rw[hl,←mul_assoc] at hk
+  exact Dvd.intro l (id (Eq.symm hk))
