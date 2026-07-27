@@ -131,7 +131,7 @@ structure RatSeq where
   x : ℕ → ℚ
 
 /-
-This instance tells Lean that a `x : RatSeq` may be used as a function `x.x : ℕ → ℚ`.
+This instance tells Lean that a `x : RatSeq` may be used as a function `x : ℕ → ℚ`.
 Thus, `x n` uses the stored function `f.x`.
 -/
 instance : CoeFun RatSeq (fun _ => ℕ → ℚ) where
