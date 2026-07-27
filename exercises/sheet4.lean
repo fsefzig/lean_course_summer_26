@@ -168,8 +168,54 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
   apply exercise0.mpr
   exact hr.symm
 
+lemma padicRule {y z : ℕ} : ∀ p, p.Prime ∧ z ∣ y ∧ y ≠ 0 → padicValNat p z ≤ padicValNat p y := by
+  intro p h
+  have h1 : p^(padicValNat p z) ∣ y := dvd_trans pow_padicValNat_dvd h.2.1
+  refine (Nat.pow_dvd_iff_le_padicValNat ?_ ?_).mp h1
+  · exact Nat.Prime.ne_one h.1
+  exact h.2.2
+
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
+-- Hint: Start with the case of prime powers and then use the prime factorization from last time.
 lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 1) : a * b ∣ c := by
   rcases h1 with ⟨k,hk⟩
+  by_cases! h4 : c = 0
+  · rw[h4]
+    exact Nat.dvd_zero (a * b)
   rw[hk] at h2
-  sorry
+  have h5 : ∀ p ∈ b.primeFactors, p^(padicValNat p b) ∣ k := by
+    intro p hp
+    by_cases h : p ∣ a
+    · apply Nat.mem_primeFactors.mp at hp
+      have h5 : p ≤ a.gcd b := by
+        rcases Nat.dvd_gcd h hp.2.1 with ⟨k,hk⟩
+        by_cases! h : k = 0
+        · simp only [h, mul_zero] at hk
+          rw[hk] at h3
+          contradiction
+        calc
+        p ≤ p * k := by
+          refine Nat.le_mul_of_pos_right p ?_
+          omega
+        _ = a.gcd b := by omega
+      rw[h3] at h5
+      have h6 : ¬ p ≤ 1 := by
+        refine Nat.not_le_of_gt ?_
+        exact Nat.Prime.one_lt hp.1
+      contradiction
+    rw[hk] at h4
+    have h2 : padicValNat p b ≤ padicValNat p a + padicValNat p k := by
+      letI : Fact (p.Prime):= ⟨(Nat.mem_primeFactors.mp hp).1⟩
+      rw[←padicValNat.mul]
+      · refine padicRule p ⟨(Nat.mem_primeFactors.mp hp).1,⟨h2,?_⟩⟩
+        rw[←hk]
+        exact Ne.symm (ne_of_ne_of_eq (Ne.symm h4) (Eq.symm hk))
+      · exact Nat.ne_zero_of_mul_ne_zero_left h4
+      exact Nat.ne_zero_of_mul_ne_zero_right h4
+    rw[padicValNat.eq_zero_of_not_dvd h,zero_add] at h2
+    refine (Nat.pow_dvd_iff_le_padicValNat ?_ ?_).mpr h2
+    · exact (Nat.mem_primeFactors.mp hp).1.prime.ne_one
+    exact Nat.ne_zero_of_mul_ne_zero_right h4
+  have h6 : b ∣ k := by
+    apply (Nat.dvd_iff_prime_pow_dvd_dvd k b).mpr
+    intro p k1 h h1
