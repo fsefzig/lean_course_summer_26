@@ -52,6 +52,47 @@ variable (k : Fin n) (l : Fin m)
 
 #check (k + l: ℝ)
 
+/-
+Structures
+
+A term of `HalfPlane` contains two real coordinates together with a proof that
+the first coordinate is smaller than the second.
+-/
+
+namespace MyStructures
+
+structure HalfPlane where
+  x : ℝ
+  y : ℝ
+  xlty : x < y
+
+/- We construct a point by supplying each field, including the proof field. -/
+def p : HalfPlane where
+  x := 0
+  y := 1
+  xlty := by norm_num
+
+-- Trick: use _ to create a skeleton of the structure.
+def q : HalfPlane := sorry
+
+/- Dot notation accesses the fields of a structure. -/
+#check p.x
+#check p.y
+#check p.xlty
+
+/-
+The conversion to `ℝ × ℝ` keeps the two coordinates and forgets the proof.
+-/
+def HalfPlane.toProd (p : HalfPlane) : ℝ × ℝ := (p.x, p.y)
+
+instance : Coe HalfPlane (ℝ × ℝ) where
+  coe := HalfPlane.toProd
+
+-- The expected type causes Lean to insert the coercion.
+example (p : HalfPlane) : ℝ × ℝ := p
+
+end MyStructures
+
 
 /-
 Sequences of rational and real numbers.
@@ -128,9 +169,6 @@ example : RatSeq where
 -- Direct wrapper
 example : RatSeq := ⟨fun n ↦ 1 / n⟩
 
--- use _ to create skeleton
-example : RatSeq := _
-
 
 /-
 We are ready to define Cauchy sequences and limits of sequences.
@@ -156,6 +194,8 @@ lemma isCauchy_toReal (x : RatSeq) : isCauchy x → isCauchyReal x := by
 -- This is essentially the definition of the real numbers.
 theorem real_numbers_complete {x : RatSeq} (hx : isCauchy x) : ∃ a : ℝ, tends_toReal x a := by
   sorry
+
+#check ℝ --ctrl + click to see the actual definition!
 
 /-
 Uniqueness of the limit of a sequence of real numbers follows from the
@@ -186,7 +226,7 @@ lemma tends_toReal_unique {x : RealSeq} {a b : ℝ} (hx : tends_toReal x a) (hy 
       rw[add_halves]
 
 /-
-Bonus: Finally we can use a structure to define the type of Cauchy sequences!
+Bonus: Finally we could use a structure to define the type of Cauchy sequences!
 -/
 
 structure RatCauchySeq where
