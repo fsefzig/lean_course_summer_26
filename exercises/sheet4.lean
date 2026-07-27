@@ -14,32 +14,81 @@ You can access them with `hR.refl`, `hR.symm` and `hR.trans`.
 lemma exercise1 {α : Type} {R : α → α → Prop} (hR : Equivalence R) (x y : α) :
     {z : α | R x z} = {z : α | R y z} ↔ R x y := by
   constructor
-  · sorry --hint: use x ∈ {z : α | R x z}
+  · intro heq
+    have hx : x ∈ {z : α | R x z} := by
+      exact hR.refl x
+    rw[heq] at hx
+    exact hR.symm hx
   intro hRxy
   apply Set.Subset.antisymm_iff.mpr -- show both inclusions
   constructor --hint: A ⊆ B means ∀ x, x ∈ A → x ∈ B
-  · sorry
-  sorry
+  · intro z hz
+    exact hR.trans (hR.symm hRxy) hz
+  intro z hz
+  exact hR.trans hRxy hz
 
 -- use `Quotient.lift` to define a function ℤ/n → ℤ/n sending ⟦x⟧ → ⟦k * x⟧.
 def mul_k (n k : ℤ) : ℤ_mod n → ℤ_mod n := by
-  sorry
+  apply Quotient.lift (fun x => q n (k * x))
+  intro a b h
+  simp only [ℤ_mod, ℤ_mod_setoid, q]
+  apply Quotient.eq.mpr
+  change n ∣ (k * a) - (k * b)
+  obtain ⟨l, hl⟩ := h
+  use k * l
+  rw[← mul_assoc, mul_comm n k, mul_assoc, ← hl]
+  group
+
 
 -- A function with a left inverse is injective. Only use definitions to solve this.
 lemma f_injective_of_left_inverse {α β : Type} (f : α → β) (g : β → α) (h : ∀ x, g (f x) = x) :
     Function.Injective f := by
-  sorry
+  intro x y hxy
+  rw[← h x,←  h y, hxy]
 
 -- A function with a right inverse is surjective. Only use definitions to solve this.
 lemma f_surjective_of_right_inverse {α β : Type} (f : α → β) (g : β → α) (h : ∀ y, f (g y) = y) :
     Function.Surjective f := by
-  sorry
+  intro y
+  use g y
+  exact h y
 
 -- Prove that the quotient map q : ℤ → ℤ/n is restricted to Fin n = {0, 1, …, n-1} is a bijection.
 -- Hint: You can prove this directly.
 theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
-  refine ⟨?_, ?_⟩
-  · sorry
+  constructor
+  · intro x y hxy
+    have hdvd : n ∣ x - y := by
+      exact Quotient.exact hxy
+    have habs : ((x: ℤ) - (y: ℤ)).natAbs < n.natAbs := by
+      omega
+    apply Int.natAbs_dvd_natAbs.mpr at hdvd
+    have h0 : (x - (y : ℤ)).natAbs = 0 := by
+      exact Nat.eq_zero_of_dvd_of_lt hdvd habs
+    omega
+  intro x
+  obtain ⟨m, hm⟩ := Quotient.exists_rep x
+  have hr : m.natAbs % n.natAbs < n.natAbs := by
+    apply Nat.mod_lt
+    exact Int.natAbs_pos.mpr hn
+  by_cases h : m ≥ 0
+  · use ⟨m.natAbs % n.natAbs, hr⟩
+    simp only [ℤ_mod, ℤ_mod_setoid, q_res, q, Int.natCast_emod, Nat.cast_natAbs, Int.cast_abs,
+      Int.cast_eq, Int.emod_abs]
+    rw[← hm]
+    apply Quotient.eq.mpr
+    simp only [mod_relation]
+    have habs : |m| = m := by exact abs_of_nonneg h
+    rw[habs]
+    exact Int.dvd_emod_sub_self
+  by_cases hrzero : m.natAbs % n.natAbs = 0
+  · use ⟨0, by omega⟩
+    sorry
+  use ⟨n.natAbs - m.natAbs % n.natAbs, by omega⟩
+  rw[← hm]
+  simp only [ℤ_mod, ℤ_mod_setoid, q_res, q]
+  apply Quotient.eq.mpr
+  simp [mod_relation]
   sorry
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
