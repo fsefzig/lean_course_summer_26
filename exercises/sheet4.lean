@@ -5,7 +5,7 @@ open MyQuotient
 -- Two integers define the same class modulo `n` exactly when they have the same remainder modulo `n`.
 -- Hint: use `modulo_eq_rest` from the lecture notes.
 lemma exercise0 {n m1 m2 : ℤ} (hn : n ≠ 0) : (q n m1) = q n m2 ↔ (m1 % n = m2 % n) := by
-  rw [q_eq]
+  rw [q_equality]
   have h1 := (Int.emod_eq_iff hn).mp (rfl : m1 % n = m1 % n)
   have h2 := (Int.emod_eq_iff hn).mp (rfl : m2 % n = m2 % n)
   constructor
@@ -45,7 +45,7 @@ def mul_k (n k : ℤ) : ℤ_mod n → ℤ_mod n := by
   intro a b h
   have hd : n ∣ a - b := h
   show q n (k * a) = q n (k * b)
-  apply q_eq.mpr
+  apply q_equality.mpr
   show n ∣ k * a - k * b
   have hkab : k * a - k * b = k * (a - b) := by ring
   rw [hkab]
@@ -83,7 +83,7 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
   refine ⟨⟨(m % n).toNat, by omega⟩, ?_⟩
   show q n ((m % n).toNat : ℤ) = x
   rw [Int.toNat_of_nonneg hnn, ← hm]
-  exact q_eq.mpr hdvd
+  exact q_equality.mpr hdvd
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
