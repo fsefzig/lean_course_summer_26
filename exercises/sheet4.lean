@@ -83,13 +83,42 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
     exact Int.dvd_emod_sub_self
   by_cases hrzero : m.natAbs % n.natAbs = 0
   · use ⟨0, by omega⟩
-    sorry
+    simp only [ℤ_mod, ℤ_mod_setoid, q_res, q, CharP.cast_eq_zero]
+    rw[← hm]
+    apply Quotient.eq.mpr
+    simp only [mod_relation, zero_sub, dvd_neg]
+    apply Int.natAbs_dvd_natAbs.mp
+    exact Nat.dvd_of_mod_eq_zero hrzero
   use ⟨n.natAbs - m.natAbs % n.natAbs, by omega⟩
   rw[← hm]
   simp only [ℤ_mod, ℤ_mod_setoid, q_res, q]
   apply Quotient.eq.mpr
-  simp [mod_relation]
-  sorry
+  simp only [mod_relation]
+  rw[Nat.mod_def]
+  have hm : m = -m.natAbs := by
+    push Not at h
+    simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq]
+    exact Int.eq_neg_comm.mp (abs_of_neg h)
+  --rw[hm]
+  --group
+  --simp
+  by_cases hn0 : 0 ≤ n
+  · have hnabs : n.natAbs = n := by
+      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, abs_eq_self]
+      exact hn0
+    use 1 - (m.natAbs / n)
+    apply Eq.symm
+    simp
+    calc n * (1 - |m| / n) = n.natAbs - n.natAbs * (|m| / n.natAbs) := by rw[← hnabs]; simp; group
+    _ = n.natAbs - (-m.natAbs + m.natAbs + n.natAbs * (|m| / n.natAbs)) := by group
+    _ = n.natAbs + m.natAbs -(m.natAbs + n.natAbs * (|m| / n.natAbs)) := by group
+    _ = n.natAbs + m.natAbs - (m.natAbs + n.natAbs * (m.natAbs / n.natAbs)) := by
+      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, ]
+    _ = ↑(n.natAbs - (m.natAbs - n.natAbs * (m.natAbs / n.natAbs))) + m.natAbs := by sorry_nf
+    _ =↑(n.natAbs - (m.natAbs - n.natAbs * (m.natAbs / n.natAbs))) - m := by
+      rw[hm]
+      simp only [Nat.cast_natAbs, Int.cast_abs, Int.cast_eq, Int.natAbs_neg, abs_abs,
+        sub_neg_eq_add]
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
