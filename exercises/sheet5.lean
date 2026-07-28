@@ -11,11 +11,18 @@ Find a useful theorem below.
 example (x : ℝ) : ⌈x⌉ ≥ x := by exact Int.le_ceil x
 
 #check one_div_le
+#check inv_eq_one_div
 
 theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
   by_cases h : ε ≤ 1
-  · sorry
-  sorry
+  · use ⌈1/ε⌉.natAbs
+    simp?
+    refine ⟨fun x => hε, ?_⟩
+    repeat rw [inv_eq_one_div]
+    sorry
+  push Not at h
+  use 1
+  simp [lt_iff_le_and_ne.mp h |>.1]
 
 /-
 Show that convergence can be expressed in terms of rational numbers. Use the above exercise.

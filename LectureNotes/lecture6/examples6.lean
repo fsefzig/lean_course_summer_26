@@ -13,7 +13,12 @@ variable {n m : ℕ} {x : ℚ} {f : ℝ → ℝ}
 
 #check 1/n
 
+-- div 1 n
+-- div : {X : Type} → X → X → X
 #check (1/n : ℚ)
+
+#check Div ℕ
+#check Div ℚ
 
 #check (n : ℚ)
 
@@ -56,6 +61,12 @@ variable (k : Fin n) (l : Fin m)
 
 #check (k + l: ℝ)
 
+#check (k : ℚ)
+
+#check Nat.cast_inj -- casting N -> Q or N -> R
+#check Rat.cast_inj -- casting Q -> R
+#check Fin.cast_inj -- casting Fin -> N
+
 /-
 Structures
 
@@ -96,7 +107,9 @@ instance : Coe HalfPlane (ℝ × ℝ) where
   coe := HalfPlane.toProd
 
 -- The expected type causes Lean to insert the coercion.
-example (p : HalfPlane) : ℝ × ℝ := p
+example (p : HalfPlane) : ℝ × ℝ := by
+  #check (p : ℝ × ℝ)
+  exact (p : ℝ × ℝ)
 
 end MyStructures
 
@@ -118,6 +131,8 @@ variable {a b : ℝ} {c d : ℚ}
 #check dist a b
 
 #check dist c d
+
+#check abs
 
 example : dist a b = |a - b| := by
   rfl
@@ -159,7 +174,8 @@ abbrev RatSeq.toRealSeq (f : RatSeq) : RealSeq where
 This instance tells Lean to insert `RatSeq.toRealSeq` when it has a `RatSeq`
 but the expected type is `RealSeq`.
 -/
-instance : Coe RatSeq RealSeq where coe x := x.toRealSeq
+instance : Coe RatSeq RealSeq where
+  coe x := x.toRealSeq
 
 -- The expected result type causes Lean to insert the registered coercion.
 example (x : RatSeq) : RealSeq := x

@@ -119,3 +119,5 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
 lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 1) : a * b ∣ c := by
   exact Nat.Coprime.mul_dvd_of_dvd_of_dvd h3 h1 h2
+
+#check Quotient.exact
