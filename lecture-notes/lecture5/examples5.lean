@@ -1,35 +1,42 @@
 import Mathlib.Tactic
 import Mathlib.Data.Int.DivMod
 
+--purpose: we're now working in the world of integers
 #check ℤ
 
-/-
-Modulo calculations for integers
--/
 
+--euclidean division
 lemma modulo_eq_rest (n m k r : ℤ) (hn : n ≠ 0) (hr : 0 ≤ r ∧ r < n.natAbs) (h : m = n * k + r)
   : m % n = r := by
   apply (Int.emod_eq_iff hn).mpr
   refine ⟨hr.1, hr.2, ?_⟩
   simp only [h, sub_add_cancel_right, dvd_neg, dvd_mul_right]
 
-namespace MyQuotient
 
+namespace MyQuotient
 @[simp]
 def mod_relation (n : ℤ) : ℤ → ℤ → Prop := fun m1 m2 => n ∣ m1 - m2
+--note: it's really a function from ℤ x ℤ → Prop
+--you think of it, like (3,4) -> f
+--imagine we fix a 3, so the second thing can vary over all of Z
+--and the function is relient on it
+--so, fixing the 3 makes it a function from Z -> prop
 
 scoped notation:50 m1 " ∼[" n "] " m2 => mod_relation n m1 m2
-
+--this gives an alternate notation that we use in the namespace
+--this below example just shows it working
+--like we can replace "m1 ∼[n] m2" with ""
 example (n m1 m2 : ℤ) : (m1 ∼[n] m2) ↔ n ∣ m1 - m2 := by
   rfl
 
-/-
-Equivalence relations are defined in the library. We prove that mod_relation n is an equivalence.
--/
+
+
 
 #check Equivalence
-
 @[simp]
+--Proving that mod_equivalence as we defined is an equivalence relation
+--requires proving reflexive x=x, symm x=y -> y=x, and transitive x=y, y=z -> x=z
+--all of which is done using simp
 theorem mod_equivalence (n : ℤ) : Equivalence (mod_relation n) where
   refl := by
     intro m
@@ -46,16 +53,21 @@ theorem mod_equivalence (n : ℤ) : Equivalence (mod_relation n) where
     rw[hdiv]
     exact (Int.dvd_add_right h12).mpr h23
 
-/-
-Equivalences and their quotients are already implemented in lean!
--/
+
 @[simp]
 def ℤ_mod_setoid (n : ℤ) : Setoid ℤ where
   r := mod_relation n
   iseqv := mod_equivalence n
+--a setoid is a set and equivalence relation packaged together
+--"natural numbers with ="
+--"all triangles with similarity"
+--both those are setoids
+
 
 @[simp]
 def ℤ_mod (n : ℤ) : Type := Quotient (ℤ_mod_setoid n)
+--What Quotient does is we get the set of all equivalence classes
+
 
 /-
 The equivalence class of an integer `m` modulo `n` is denoted by `Quotient.mk (ℤ_mod_setoid hn) m`.
@@ -70,10 +82,18 @@ example (n m : ℤ) : Quotient.mk (ℤ_mod_setoid n) m = (⟦m⟧ : ℤ_mod n) :
 
 @[simp]
 def q (n : ℤ) : ℤ → ℤ_mod n := Quotient.mk (ℤ_mod_setoid n)
+--this sends any number n to its equivalence class mod n
+
+
 
 lemma q_eq {n m1 m2 : ℤ} : (q n m1) = q n m2 ↔ (m1 ∼[n] m2) := by
   simp only [q, ℤ_mod_setoid, mod_relation]
+  --note that simp only here undoes the definitions for q, Z-modsetoid, and mod_relation
+  -- ⟦m1⟧ = ⟦m2⟧ ↔ n ∣ m1 - m2
   exact Quotient.eq
+
+
+
 
 /-
 Now we need to define the function C : ℤ_mod (n * m) → ℤ_mod n × ℤ_mod m.
