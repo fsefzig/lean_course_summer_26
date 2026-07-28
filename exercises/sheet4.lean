@@ -128,8 +128,7 @@ lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 
       obtain ⟨p, hp, hpa⟩ := Nat.exists_prime_and_dvd ha1
       let k := a.factorization p
       let r := a / p ^ k
-      have hprod : p ^ k * r = a := by
-        exact Nat.ordProj_mul_ordCompl_eq_self a p
+      have hprod : p ^ k * r = a := Nat.ordProj_mul_ordCompl_eq_self a p
       have hrlt : r < a := by
         apply Nat.div_lt_self (Nat.zero_lt_of_ne_zero ha0)
         refine Nat.one_lt_pow ?_ (Nat.Prime.one_lt hp)
@@ -138,8 +137,7 @@ lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 
         use p ^ k
         rw [mul_comm]
         exact hprod.symm
-      rw[← hprod]
-      rw[mul_assoc]
+      rw[← hprod, mul_assoc]
       refine prime_power_case hp ?_ ?_ ?_
       · rw[← hprod] at h1
         exact dvd_of_mul_right_dvd h1
