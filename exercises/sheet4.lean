@@ -9,25 +9,20 @@ lemma exercise0 {n m1 m2 : ℤ} (hn : n ≠ 0) : (q n m1) = q n m2 ↔ (m1 % n =
   constructor
   · intro hq
     obtain ⟨k, hk⟩ := q_equality.mp hq
-    have hr : 0 ≤ m2 % n ∧ m2 % n < n.natAbs := by
-      exact ⟨Int.emod_nonneg m2 hn, Int.emod_lt m2 hn⟩
-    have hm2 : m2 = n * (m2 / n) + m2 % n := by
-      exact (Int.mul_ediv_add_emod m2 n).symm
-    have hm1 : m1 = n * (k + m2 / n) + m2 % n := by
-      calc
+    apply modulo_eq_rest n m1
+      (k + m2 / n) (m2 % n) hn (⟨Int.emod_nonneg m2 hn, Int.emod_lt m2 hn⟩)
+    calc
         m1 = n * k + m2 := by omega
-        _ = n * k + (n * (m2 / n) + m2 % n) := by rw [← hm2]
+        _ = n * k + (n * (m2 / n) + m2 % n) := by simp only [Int.mul_ediv_add_emod m2 n]
         _ = n * (k + m2 / n) + m2 % n := by ring
-    exact modulo_eq_rest n m1 (k + m2 / n) (m2 % n) hn hr hm1
   · intro hmod
     apply q_equality.mpr
-    change n ∣ m1 - m2
     use m1 / n - m2 / n
     calc
       m1 - m2 =
           (n * (m1 / n) + m1 % n) - (n * (m2 / n) + m2 % n) := by
             rw [Int.mul_ediv_add_emod, Int.mul_ediv_add_emod]
-      _ = n * (m1 / n - m2 / n) := by rw [hmod]; ring
+      _ = n * (m1 / n - m2 / n) := by rw [hmod]; group
 
 /- Look at exercise_class.lean in LectureNotes/lecture4 for the setbuilder notation.
 Use the properties of equivalence relations to prove the following lemma.
@@ -129,10 +124,6 @@ lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 
       let k := a.factorization p
       let r := a / p ^ k
       have hprod : p ^ k * r = a := Nat.ordProj_mul_ordCompl_eq_self a p
-      have hrlt : r < a := by
-        apply Nat.div_lt_self (Nat.zero_lt_of_ne_zero ha0)
-        refine Nat.one_lt_pow ?_ (Nat.Prime.one_lt hp)
-        exact Nat.ne_zero_of_lt (hp.factorization_pos_of_dvd ha0 hpa)
       have hr_dvd_a : r ∣ a := by
         use p ^ k
         rw [mul_comm]
@@ -141,7 +132,10 @@ lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 
       refine prime_power_case hp ?_ ?_ ?_
       · rw[← hprod] at h1
         exact dvd_of_mul_right_dvd h1
-      · refine ih r hrlt ?_ h2 (Nat.Coprime.coprime_dvd_left hr_dvd_a h3 )
+      · refine ih r ?_ ?_ h2 (Nat.Coprime.coprime_dvd_left hr_dvd_a h3)
+        · apply Nat.div_lt_self (Nat.zero_lt_of_ne_zero ha0)
+          refine Nat.one_lt_pow ?_ (Nat.Prime.one_lt hp)
+          exact Nat.ne_zero_of_lt (hp.factorization_pos_of_dvd ha0 hpa)
         rw[← hprod] at h1
         exact dvd_of_mul_left_dvd h1
       apply Nat.Coprime.pow_left k
