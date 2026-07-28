@@ -1,4 +1,5 @@
 import LectureNotes.lecture5.examples5
+import Mathlib.Data.Nat.Factorization.Basic
 
 open MyQuotient
 
@@ -100,5 +101,52 @@ theorem exercise2 {n : ℤ} (hn : n ≠ 0) : Function.Bijective (q_res n) := by
 
 -- If coprime integers `a` and `b` both divide `c`, then their product also divides `c`.
 -- Hint: Start with the case of prime powers and then use the prime factorization from last time.
+lemma prime_power_case {p k b c : ℕ} (hp : Nat.Prime p)
+    (h1 : p ^ k ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd (p ^ k) b = 1) :
+    p ^ k * b ∣ c := by
+  obtain ⟨l,hl⟩ := h2
+  rw[hl, mul_comm]
+  rw[hl] at h1
+  apply Nat.mul_dvd_mul (Nat.dvd_refl b)
+  cases k with
+  | zero =>
+    rw [pow_zero]
+    exact one_dvd l
+  | succ k =>
+    refine (Nat.prime_iff.mp hp).pow_dvd_of_dvd_mul_left (k + 1) ?_ h1
+    apply hp.coprime_iff_not_dvd.mp
+    exact Nat.Coprime.of_dvd_left (dvd_pow_self p (Nat.succ_ne_zero k)) h3
+
+
 lemma exercise3 {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : Nat.gcd a b = 1) : a * b ∣ c := by
-  sorry
+  induction a using Nat.strong_induction_on generalizing b c with
+  | h a ih =>
+      by_cases ha0 : a = 0
+      · simpa [ha0] using h1
+      by_cases ha1 : a = 1
+      · simpa [ha1] using h2
+      obtain ⟨p, hp, hpa⟩ := Nat.exists_prime_and_dvd ha1
+      let k := a.factorization p
+      let r := a / p ^ k
+      have hprod : p ^ k * r = a := by
+        exact Nat.ordProj_mul_ordCompl_eq_self a p
+      have hrlt : r < a := by
+        apply Nat.div_lt_self (Nat.zero_lt_of_ne_zero ha0)
+        refine Nat.one_lt_pow ?_ (Nat.Prime.one_lt hp)
+        exact Nat.ne_zero_of_lt (hp.factorization_pos_of_dvd ha0 hpa)
+      have hr_dvd_a : r ∣ a := by
+        use p ^ k
+        rw [mul_comm]
+        exact hprod.symm
+      rw[← hprod]
+      rw[mul_assoc]
+      refine prime_power_case hp ?_ ?_ ?_
+      · rw[← hprod] at h1
+        exact dvd_of_mul_right_dvd h1
+      · refine ih r hrlt ?_ h2 (Nat.Coprime.coprime_dvd_left hr_dvd_a h3 )
+        rw[← hprod] at h1
+        exact dvd_of_mul_left_dvd h1
+      apply Nat.Coprime.pow_left k
+      refine Nat.Coprime.mul_right ?_ ?_
+      · exact Nat.coprime_ordCompl hp ha0
+      exact Nat.Coprime.coprime_dvd_left hpa h3
