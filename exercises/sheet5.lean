@@ -1,5 +1,4 @@
 import LectureNotes.lecture6.examples6
-import Mathlib.Topology.MetricSpace.IsometricSMul
 
 open MySequences
 
@@ -40,7 +39,14 @@ Show that convergence can be expressed in terms of rational numbers. Use the abo
 -/
 theorem exericse2 {x : RealSeq} (a : ℝ) (hx : ∀ δ : ℕ, δ > 0 → ∃ N, ∀ n≥ N, dist (x n) a < 1 / δ)
   : tends_toReal x a := by
-  sorry
+  unfold tends_toReal
+  intro ε hε
+  obtain ⟨δ, hδ⟩ := exercise1 hε
+  obtain ⟨N, hN⟩ := hx δ hδ.1
+  use N
+  intro n hn
+  have h := hN n hn
+  exact lt_of_lt_of_le h hδ.2
 
 /-
 Show that rational Cauchy sequences are also Cauchy sequences of real numbers and vice versa.
@@ -60,17 +66,19 @@ theorem exercise4 {x : RealSeq} (a : ℝ) (hx : tends_toReal x a) : isCauchyReal
   unfold tends_toReal at hx
   unfold isCauchyReal
   intro ε hε
-  obtain ⟨N, hN⟩ := hx ε hε
+  obtain ⟨N, hN⟩ := hx (ε/2) (by simp [hε])
   use N
   intro m hm n hn
   obtain h := hN m hm
   obtain h' := hN n hn
+  have tri := dist_triangle (x.x m) a (x.x n)
+  have add := add_lt_add_of_lt_of_lt h h'
+  rw [dist_comm a (x.x n)] at tri
+  have trans := lt_of_le_of_lt tri add
+  norm_num at trans
+  exact trans
 
 
-theorem fiveadd : (5 : ℝ) = @Nat.cast ℝ Real.instNatCast 5 := by
-  exact Eq.symm (Real.ext_cauchy rfl)
-
-#check dist_add_left
 
 /-
 Finally, define a sequence of real numbers that does not converge.
@@ -79,6 +87,8 @@ Finally, define a sequence of real numbers that does not converge.
 def my_diverging_sequence : RealSeq where
   x n := n
 
+theorem fiveadd : (5 : ℝ) = @Nat.cast ℝ Real.instNatCast 5 := by
+  exact Eq.symm (Real.ext_cauchy rfl)
 
 theorem exercise5 : ¬ ∃ a : ℝ, tends_toReal my_diverging_sequence a := by
   unfold tends_toReal my_diverging_sequence
@@ -94,12 +104,7 @@ theorem exercise5 : ¬ ∃ a : ℝ, tends_toReal my_diverging_sequence a := by
   have tri := dist_triangle (N + 1 : ℝ) a (N + 5)
   rw [dist_comm a] at tri
   have x := lt_of_le_of_lt tri add
-  have : IsIsometricVAdd ℝ ℝ := sorry
-  rw [dist_add_left] at x
-  have rwh : dist (1 : ℝ) 5 = 4 := by
-    sorry
-  rw [rwh] at x
-  rw [show (1 : ℝ) + 1 = 2 by sorry] at x
-  sorry
+  rw [Real.dist_eq] at x
+  norm_num at x
 
 #check dist
