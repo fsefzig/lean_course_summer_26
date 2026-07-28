@@ -45,8 +45,8 @@ lemma exercise1 {α : Type} {R : α → α → Prop} (hR : Equivalence R) (x y :
   exact hR.trans hRxy hz
 
 -- use `Quotient.lift` to define a function ℤ/n → ℤ/n sending ⟦x⟧ → ⟦k * x⟧.
-def mul_k (n k : ℤ) : ℤ_mod n → ℤ_mod n := by
-  apply Quotient.lift (fun x => q n (k * x))
+def mul_k (n k : ℤ) : ℤ_mod n → ℤ_mod n :=
+  Quotient.lift (fun x => q n (k * x)) <| by
   intro a b h
   simp only [ℤ_mod, ℤ_mod_setoid, q]
   apply Quotient.eq.mpr
