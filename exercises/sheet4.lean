@@ -61,7 +61,7 @@ def mul_k (n k : ℤ) : ℤ_mod n → ℤ_mod n := by
 lemma f_injective_of_left_inverse {α β : Type} (f : α → β) (g : β → α) (h : ∀ x, g (f x) = x) :
     Function.Injective f := by
   intro x y hxy
-  rw[← h x,←  h y, hxy]
+  rw[← h x,← h y, hxy]
 
 -- A function with a right inverse is surjective. Only use definitions to solve this.
 lemma f_surjective_of_right_inverse {α β : Type} (f : α → β) (g : β → α) (h : ∀ y, f (g y) = y) :
