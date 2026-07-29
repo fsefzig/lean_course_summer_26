@@ -58,8 +58,7 @@ theorem exercise2 {p q n : ℕ} (hp : p.Prime) (hq : q.Prime) (hqn : q ∣ n) :
     · right
       have npdqexp : ¬ p ∣ q ^ primeExponent n q := by
         have npdq : ¬ p ∣ q := by
-            refine (Nat.Prime.coprime_iff_not_dvd hp).mp ?_
-            exact (coprime_primes hp hq).mpr hpq
+          refine (Nat.Prime.coprime_iff_not_dvd hp).mp ((coprime_primes hp hq).mpr hpq)
         exact primes_notdvd_exp hp (primeExponent n q) npdq
       rw[hn] at pdn
       exact (hp.dvd_mul.mp pdn).resolve_left npdqexp
