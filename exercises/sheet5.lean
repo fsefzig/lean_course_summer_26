@@ -90,5 +90,25 @@ theorem exercise5 : ¬ ∃ a : ℝ, tends_toReal my_diverging_sequence a := by
     apply ha
     exact Real.zero_lt_one
   rcases h1 with ⟨N,hN⟩
-  have h2 : ((dist (max N ⌈a+1⌉.toNat) a) : ℝ) < 1 := by
-    apply hN (max N ⌈a+1⌉.toNat)
+  have h2 : ((dist ((max N ⌈a+1⌉.natAbs) : ℝ) a)) < 1 := by
+    have h3 := hN (max N ⌈a+1⌉.natAbs) (Nat.le_max_left N ⌈a + 1⌉.natAbs)
+    push_cast at h3
+    exact h3
+  have h3 : ((dist ((max N ⌈a+1⌉.natAbs) : ℝ) a)) ≥ 1 := by
+    calc
+      1 = a + 1 - a := by ring
+      _ ≤ ⌈a + 1⌉ - a := by
+        refine sub_le_sub_right ?_ a
+        exact Int.le_ceil (a + 1)
+      _ ≤ ⌈a + 1⌉.natAbs - a := by
+        refine sub_le_sub_right ?_ a
+        simp only [Nat.cast_natAbs]
+        refine Int.cast_le.mpr ?_
+        exact le_abs_self ⌈a + 1⌉
+      _ ≤ max N ⌈a+1⌉.natAbs - a := by
+        refine sub_le_sub_right ?_ a
+        refine Nat.cast_le.mpr ?_
+        omega
+      _ ≤ |max N ⌈a+1⌉.natAbs - a| := le_abs_self (↑(max N ⌈a + 1⌉.natAbs) - a)
+      _ = dist ((max N ⌈a+1⌉.natAbs) : ℝ) a := by simp only [Int.ceil_add_one, Nat.cast_max, Nat.cast_natAbs, Int.cast_abs, Int.cast_add, Int.cast_one, dist]
+  linarith
