@@ -35,41 +35,9 @@ theorem sum_formula (n : ℕ) : n = ∑ d ∈ (Nat.divisors n), ϕ d := by
 The proof of both relations involves the following properties of the totient function.
 -/
 lemma ϕ_prime_power {p : ℕ} (hp : Nat.Prime p) (k : ℕ) : ϕ (p ^ k) = p ^ k - p ^ (k - 1) := by
-  have h : ϕ (p^k) = Nat.card (Fin (p^k)) - Nat.card {x : Fin (p^k) | ¬ IsCoprime x.val (p^k)} := by
-    dsimp only [ϕ]
-    have h1 : U (p^k) = {x : Fin (p^k) | x < p^k} \ {x : Fin (p^k) | ¬ IsCoprime x.val (p^k)} := by
-      dsimp only [U]
-      refine Set.ext ?_
-      intro x
-      constructor
-      · intro hx
-        refine (Set.mem_sdiff x).mpr ?_
-        constructor
-        · refine Set.mem_setOf.mpr ?_
-          exact x.2
-        intro h
-        contradiction
-      intro hx
-      apply (Set.mem_sdiff x).mp at hx
-      have hx2 := hx.2
-      refine Set.mem_setOf.mpr ?_
-      apply Set.notMem_setOf_iff.mp at hx2
-      tauto
-    dsimp[U] at h1
-    rw[h1]
-    simp only [Nat.isCoprime_iff, Nat.card_eq_fintype_card, Set.fintypeCard_eq_ncard]
-    rw[Set.ncard_sdiff]
-    · simp only [Fin.is_lt, Set.setOf_true, Set.ncard_univ, Nat.card_eq_fintype_card, Fintype.card_fin, pow_eq_one_iff, not_or]
-    intro x hx
-    refine Set.mem_setOf.mpr ?_
-    exact x.2
-  have h1 : ϕ (p^k) = p^k - Nat.card {x : Fin (p^k) | ¬ IsCoprime x.val (p^k)} := by
-    rw[h]
-    refine Nat.sub_eq_of_eq_add ?_
-    rw[Nat.sub_add_cancel]
-    · simp only [Nat.card_eq_fintype_card, Fintype.card_fin]
-    sorry
   sorry
+
+
 lemma ϕ_multiplicative {m n : ℕ} (h : IsCoprime m n) : ϕ (m * n) = ϕ m * ϕ n := by
   sorry
 
