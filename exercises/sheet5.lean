@@ -73,17 +73,22 @@ theorem exercise4 {x : RealSeq} (a : ℝ) (hx : tends_toReal x a) : isCauchyReal
   intro m hm n hn
   calc
   dist (x.x m) (x.x n) ≤ dist (x.x m) a + dist (x.x n) a := dist_triangle_right (x.x m) (x.x n) a
-  _ < ε/2 + ε/2 := by
-    apply hN at hn
-    apply hN at hm
-    exact add_lt_add hm hn
+  _ < ε/2 + ε/2 := add_lt_add (hN m hm) (hN n hn)
   _ = ε := by simp only [add_halves]
 /-
 Finally, define a sequence of real numbers that does not converge.
 -/
 
 def my_diverging_sequence : RealSeq where
-  x n := sorry
+  x n := n
 
 theorem exercise5 : ¬ ∃ a : ℝ, tends_toReal my_diverging_sequence a := by
-  sorry
+  intro h
+  rcases h with ⟨a,ha⟩
+  simp only [tends_toReal, gt_iff_lt, ge_iff_le, my_diverging_sequence] at ha
+  have h1 : ∃ N, ∀ (n : ℕ), N ≤ n → dist (n : ℝ) a < 1 := by
+    apply ha
+    exact Real.zero_lt_one
+  rcases h1 with ⟨N,hN⟩
+  have h2 : ((dist (max N ⌈a+1⌉.toNat) a) : ℝ) < 1 := by
+    apply hN (max N ⌈a+1⌉.toNat)
