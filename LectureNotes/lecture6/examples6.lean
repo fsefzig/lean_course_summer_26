@@ -15,6 +15,10 @@ variable {n m : ℕ} {x : ℚ} {f : ℝ → ℝ}
 
 #check (1/n : ℚ)
 
+#check (n : ℚ)
+
+#check @Nat.cast ℚ _
+
 #check x + 1/n
 
 #check (x : ℝ) + (1/n : ℝ)
@@ -73,7 +77,10 @@ def p : HalfPlane where
   xlty := by norm_num
 
 -- Trick: use _ to create a skeleton of the structure.
-def q : HalfPlane := sorry
+def q : HalfPlane where
+  x := sorry
+  y := sorry
+  xlty := sorry
 
 /- Dot notation accesses the fields of a structure. -/
 #check p.x
@@ -124,8 +131,8 @@ structure RatSeq where
   x : ℕ → ℚ
 
 /-
-This instance tells Lean that a `RatSeq` may be used as a function `ℕ → ℚ`.
-Thus, `f n` uses the stored function `f.x`.
+This instance tells Lean that a `x : RatSeq` may be used as a function `x : ℕ → ℚ`.
+Thus, `x n` uses the stored function `f.x`.
 -/
 instance : CoeFun RatSeq (fun _ => ℕ → ℚ) where
   coe f := f.x
@@ -177,22 +184,22 @@ and `N`.
 -/
 def isCauchy (x : RatSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
 
-def tends_to (x : RatSeq) (a : ℚ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
+def tends_toRat (x : RatSeq) (a : ℚ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
 
 def isCauchyReal (x : RealSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
 
-def tends_toReal (x : RealSeq) (a : ℝ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
+abbrev tends_to (x : RealSeq) (a : ℝ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
 
 
--- We can evaluate `tends_toReal` on a sequence of rational numbers.
-example (x : RatSeq) (a : ℝ) : tends_toReal x a := by sorry
+-- We can evaluate `tends_to` on a sequence of rational numbers.
+example (x : RatSeq) (a : ℝ) : tends_to x a := by sorry
 
 -- Find the proof of this on the exercise sheet.
 lemma isCauchy_toReal (x : RatSeq) : isCauchy x → isCauchyReal x := by
   sorry
 
 -- This is essentially the definition of the real numbers.
-theorem real_numbers_complete {x : RatSeq} (hx : isCauchy x) : ∃ a : ℝ, tends_toReal x a := by
+theorem real_numbers_complete {x : RealSeq} (hx : isCauchyReal x) : ∃ a : ℝ, tends_to x a := by
   sorry
 
 #check ℝ --ctrl + click to see the actual definition!
@@ -205,7 +212,7 @@ positive number.
 
 #check @eq_of_forall_dist_le _ _ a b
 
-lemma tends_toReal_unique {x : RealSeq} {a b : ℝ} (hx : tends_toReal x a) (hy : tends_toReal x b) :
+lemma tends_toReal_unique {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (hy : tends_to x b) :
   a = b := by
   apply eq_of_forall_dist_le
   intro ε hε
@@ -242,6 +249,29 @@ example : RatCauchySeq ≃ {x : RatSeq | isCauchy x} := by
 
 --By using a structure instead of a subtype we get direct access to the fields of the structure.
 example (x : RatCauchySeq) : isCauchy x.x := x.isCauchy
+
+
+/-
+This is roughly how the real numbers are defined in lean: as equivalence classes of Cauchy sequences
+of rational numbers. Feel free to explore a bit here and try to define for example addition.
+-/
+
+def CauchyRel : RatCauchySeq → RatCauchySeq → Prop :=
+  fun x y ↦ ∀ ε > 0, ∃ N, ∀ n≥ N, |(x.x n) - (y.x n)| < ε
+
+theorem CauchyRel_equiv : Equivalence CauchyRel := by
+  sorry
+
+def CauchySetoid : Setoid RatCauchySeq where
+  r := CauchyRel
+  iseqv := CauchyRel_equiv
+
+def Real := Quotient CauchySetoid
+
+def Rat.toReal (x : ℚ) : Real := by
+  refine Quotient.mk CauchySetoid ⟨⟨fun n => x⟩, ?_⟩
+  sorry
+
 
 end MySequences
 
