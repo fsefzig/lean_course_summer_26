@@ -38,8 +38,7 @@ lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n
   have hN : a - (x.x N) < a - b := by
     calc
       a - (x.x N) ≤ dist (x.x N) a := by
-        simp only [dist]
-        rw[abs_sub_comm]
+        simp only [dist, abs_sub_comm]
         exact le_abs_self (a - x.x N)
       _ < a - b := by linarith
   linarith
