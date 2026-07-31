@@ -62,8 +62,21 @@ You may find `Function.comp_apply` useful when simplifying compositions.
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : continuousAt f a) (hg : continuousAt g (f a)) :
     continuousAt (g ∘ f) a := by
-  sorry
-
+      intro ε hε
+      have hf := hf (ε/2) (half_pos hε)
+      have hg := hg (ε/2) (half_pos hε)
+      rcases hf with ⟨δ1,hδ1⟩
+      rcases hg with ⟨δ2,hδ2⟩
+      use min δ1 δ2
+      constructor
+      · exact lt_min hδ1.1 hδ2.1
+      intro y hy
+      simp only [Function.comp_apply]
+      have hy1 : dist y a < δ1 := by
+        calc
+        dist y a < min δ1 δ2 := hy
+        _ ≤ δ1 := Std.min_le_left
+      apply hδ1.2 at hy1
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
 -/
