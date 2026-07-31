@@ -19,7 +19,7 @@ theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ)
     refine ⟨Nat.ceil_pos.mpr (show 0 < ⌈1 / ε⌉ by positivity), ?_⟩
     apply (one_div_le _ _).mpr
     · have h : (⌈1 / ε⌉.toNat : ℝ) = ⌈1 / ε⌉ := by
-        exact_mod_cast Int.toNat_of_nonneg (show 0 ≤ ⌈1 / ε⌉ by positivity)
+        exact_mod_cast Int.toNat_of_nonneg (by positivity)
       rw[h]
       exact Int.le_ceil (1 / ε)
     · apply Nat.cast_pos'.mpr
@@ -58,11 +58,10 @@ Finally, show that convergent sequences are Cauchy sequences.
 -/
 theorem exercise4 {x : RealSeq} (a : ℝ) (hx : tends_to x a) : isCauchyReal x := by
   intro ε hε
-  have hε2 : ε / 2 > 0 := by positivity
-  obtain ⟨N, hN⟩ := hx (ε / 2) hε2
+  obtain ⟨N, hN⟩ := hx (ε / 2) (by positivity)
   use N
   intro m hm n hn
-  calc _
+  calc
     dist (x m) (x n) ≤ dist (x m) a + dist a (x n) := dist_triangle (x m) a (x n)
     _ = dist (x m) a + dist (x n) a := by rw[dist_comm a (x n)]
     _ < ε / 2 + ε / 2 := by exact add_lt_add (hN m hm) (hN n hn)
