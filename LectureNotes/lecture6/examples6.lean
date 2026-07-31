@@ -159,7 +159,16 @@ abbrev RatSeq.toRealSeq (f : RatSeq) : RealSeq where
 This instance tells Lean to insert `RatSeq.toRealSeq` when it has a `RatSeq`
 but the expected type is `RealSeq`.
 -/
+
+
+
 instance : Coe RatSeq RealSeq where coe x := x.toRealSeq
+--!!!
+--
+
+
+
+
 
 -- The expected result type causes Lean to insert the registered coercion.
 example (x : RatSeq) : RealSeq := x
