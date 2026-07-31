@@ -46,7 +46,18 @@ lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n
 -- For exercise 2
 lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≥ b) :
     a ≥ b := by
-  sorry
+  contrapose! h
+  have h1 : b - a > 0 := by linarith
+  apply hx at h1
+  rcases h1 with ⟨N,hN⟩
+  use N
+  have hN1 := Nat.le_refl N
+  apply hN at hN1
+  have hN : (x.x N) - a < b - a := by
+    calc
+      (x.x N) - a ≤ dist (x.x N) a := Real.sub_le_dist (x.x N) a
+      _ < b - a := by linarith
+  linarith
 
 end MySequences
 
@@ -63,27 +74,47 @@ lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : continuousAt f a) (hg : continuousAt g (f a)) :
     continuousAt (g ∘ f) a := by
       intro ε hε
-      have hf := hf (ε/2) (half_pos hε)
-      have hg := hg (ε/2) (half_pos hε)
-      rcases hf with ⟨δ1,hδ1⟩
-      rcases hg with ⟨δ2,hδ2⟩
-      use min δ1 δ2
+      have hg := hg ε hε
+      rcases hg with ⟨δ1,hδ1⟩
+      have hδ := hδ1.1
+      apply hf at hδ
+      rcases hδ with ⟨δ2,hδ2⟩
+      use δ2
       constructor
-      · exact lt_min hδ1.1 hδ2.1
+      · exact hδ2.1
       intro y hy
       simp only [Function.comp_apply]
-      have hy1 : dist y a < δ1 := by
-        calc
-        dist y a < min δ1 δ2 := hy
-        _ ≤ δ1 := Std.min_le_left
-      apply hδ1.2 at hy1
+      apply hδ2.2 at hy
+      exact hδ1.2 (f y) hy
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
 -/
 lemma continuous_sum_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : continuousAt f a) (hg : continuousAt g a) :
     continuousAt (f + g) a := by
-  sorry
+  intro ε hε
+  have hf := hf (ε/2) (half_pos hε)
+  have hg := hg (ε/2) (half_pos hε)
+  rcases hf with ⟨δ1,hδ1⟩
+  rcases hg with ⟨δ2,hδ2⟩
+  use min δ1 δ2
+  constructor
+  · exact lt_min hδ1.1 hδ2.1
+  intro y hy
+  have hy1 : dist y a < δ1 := by
+    calc
+      dist y a < min δ1 δ2 := hy
+      _ ≤ δ1 := Std.min_le_left
+  apply hδ1.2 at hy1
+  have hy2 : dist y a < δ2 := by
+    calc
+      dist y a < min δ1 δ2 := hy
+      _ ≤ δ2 := Std.min_le_right
+  apply hδ2.2 at hy2
+  simp only [Pi.add_apply, gt_iff_lt]
+  calc
+    dist (f y + g y) (f a + g a) ≤ dist (f y) (f a) + dist (g y) (g a) := dist_add_add_le (f y) (g y) (f a) (g a)
+    _ < ε := by linarith
 
 end MyFunctions
 
@@ -131,9 +162,9 @@ Hint: a is also the limit of the sequence `u`.
 7) Prove the at least one of the lemmas below.
 -/
 
-lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
+theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
     ∃ sup : upperBounds S, ∀ b : upperBounds S, sup ≤ b := by
-  sorry
+
 
 
 /-
