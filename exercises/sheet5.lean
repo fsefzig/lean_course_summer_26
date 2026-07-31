@@ -82,8 +82,7 @@ def my_diverging_sequence : RealSeq where
 
 theorem exercise5 : ¬ ∃ a : ℝ, tends_to my_diverging_sequence a := by
   let x := my_diverging_sequence
-  intro h
-  obtain ⟨a, ha⟩ := h
+  intro ⟨a, ha⟩
   have ⟨N, hN⟩ := ha 1 Real.zero_lt_one
   have hcon :  dist (x N) (x (N+1)) = 2 := by
     calc
