@@ -8,21 +8,56 @@ namespace MySequences
 ## Lemmas for sequences
 -/
 
+#check dist_triangle
+#check norm_add_le
+
+theorem dist_ineq {a b c d : ℝ} : dist (a + b) (c + d) ≤ dist a c + dist b d := by
+  repeat rw [Real.dist_eq]
+  calc |a + b - (c + d)|
+    _ = |a - c + (b - d)| := by congr; linarith
+  exact norm_add_le (a - c) (b - d)
+
 /-- The sum of two convergent sequences converges to the sum of their limits. -/
 lemma tends_to_add {x y : RealSeq} {a b : ℝ}
     (hx : tends_to x a) (hy : tends_to y b) :
     tends_to ⟨fun n ↦ x n + y n⟩ (a + b) := by
-  sorry
+  unfold tends_to at *
+  dsimp at *
+  intro ε hε
+  obtain ⟨xN, hxN⟩ := hx (ε/2) (by positivity)
+  obtain ⟨yN, hyN⟩ := hy (ε/2) (by positivity)
+  use max xN yN
+  intro n hn
+  calc dist (x.x n + y.x n) (a + b)
+    _ ≤ dist (x.x n) a + dist (y.x n) b := dist_ineq
+    _ < ε / 2 + ε / 2 := add_lt_add_of_lt_of_lt
+      (hxN n <| by linarith [le_max_left xN yN, hn])
+      (hyN n <| by linarith [le_max_right xN yN, hn])
+    _ = ε := by norm_num
 
 -- For exercise 2
 lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≤ b) :
     a ≤ b := by
-  sorry
+  unfold tends_to at hx
+  by_contra! hc
+  obtain ⟨N, hN⟩ := hx (a - b) (by positivity)
+  have h₁ := hN (N+1) (by simp)
+  have h₂ := h (N+1)
+  rw [Real.dist_eq] at h₁
+  apply sub_lt_of_abs_sub_lt_left at h₁
+  linarith
 
 -- For exercise 2
 lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≥ b) :
     a ≥ b := by
-  sorry
+  unfold tends_to at hx
+  by_contra! hc
+  obtain ⟨N, hN⟩ := hx (b - a) (by positivity)
+  have h₁ := hN (N+1) (by simp)
+  have h₂ := h (N+1)
+  rw [Real.dist_eq] at h₁
+  apply sub_lt_of_abs_sub_lt_right at h₁
+  linarith
 
 end MySequences
 
@@ -38,7 +73,18 @@ You may find `Function.comp_apply` useful when simplifying compositions.
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : continuousAt f a) (hg : continuousAt g (f a)) :
     continuousAt (g ∘ f) a := by
-  sorry
+  unfold continuousAt at *
+  intro ε hε
+  obtain ⟨δg, hδg⟩ := hg ε hε
+  obtain ⟨δf, hδf⟩ := hf δg hδg.1
+  use δf
+  refine ⟨hδf.1, ?_⟩
+  intro y hy
+  repeat rw [Function.comp_apply]
+  exact hδg.2 (f y) <| hδf.2 y hy
+
+#check Pi.add_apply
+#check min_le_right
 
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
@@ -46,7 +92,20 @@ Use the above lemma to prove that the sum of two continuous functions is continu
 lemma continuous_sum_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : continuousAt f a) (hg : continuousAt g a) :
     continuousAt (f + g) a := by
-  sorry
+  unfold continuousAt at *
+  intro ε hε
+  obtain ⟨δg, hδg⟩ := hg (ε/2) <| by positivity
+  obtain ⟨δf, hδf⟩ := hf (ε/2) <| by positivity
+  use min δf δg
+  refine ⟨by positivity [hδf.1, hδg.1], ?_⟩
+  intro y hy
+  repeat rw [Pi.add_apply]
+  have h₁ := hδf.2 y <| by linarith [min_le_left δf δg, hy]
+  have h₂ := hδg.2 y <| by linarith [min_le_right δf δg, hy]
+  calc dist (f y + g y) (f a + g a)
+    _ ≤ dist (f y) (f a) + dist (g y) (g a) := dist_ineq
+    _ < ε / 2 + ε / 2 := add_lt_add_of_lt_of_lt h₁ h₂
+    _ = ε := by norm_num
 
 end MyFunctions
 
@@ -93,6 +152,42 @@ Hint: a is also the limit of the sequence `u`.
 
 7) Prove the at least one of the lemmas about limits above.
 -/
+
+#check sSup {x : ℝ | x > 5}
+#print axioms Real.exists_isLUB
+
+noncomputable section
+variable {S : Set ℝ} (hS : S.Nonempty) (hbdd : (upperBounds S).Nonempty)
+
+structure SeqEntry : Type where
+  l : ℝ
+  u : ℝ
+  hl : l ∈ S
+  hu : u ∈ upperBounds S
+
+def seq : ℕ → ℝ × ℝ
+| 0 => ⟨Classical.choose hS, Classical.choose hbdd, ⟩
+| Nat.succ n => by
+    let ⟨l, u⟩ := seq n
+    let m := l + u / 2
+    by_cases h : m ∈ upperBounds S
+    · exact ⟨l, m⟩
+    · unfold upperBounds at h
+      dsimp at h; push Not at h
+      exact ⟨Classical.choose h, u⟩
+
+abbrev seqL (n : ℕ) : ℝ := (seq hS hbdd n).fst
+abbrev seqU (n : ℕ) : ℝ := (seq hS hbdd n).snd
+
+theorem fstIn {n : ℕ} : seqL hS hbdd n ∈ S := by
+  induction n with
+  | zero => sorry
+  | succ p hp =>
+    unfold seqL seq
+    dsimp
+    sorry
+end
+
 
 lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
     ∃ sup : upperBounds S, ∀ b : upperBounds S, sup ≤ b := by
