@@ -1,5 +1,5 @@
 import LectureNotes.lecture7.examples7
-
+set_option linter.style.longLine false
 open MyFunctions MySequences
 
 namespace MySequences
@@ -12,12 +12,37 @@ namespace MySequences
 lemma tends_to_add {x y : RealSeq} {a b : ℝ}
     (hx : tends_to x a) (hy : tends_to y b) :
     tends_to ⟨fun n ↦ x n + y n⟩ (a + b) := by
-  sorry
-
+  intro ε hε
+  have hx := hx (ε/2) (half_pos hε)
+  have hy := hy (ε/2) (half_pos hε)
+  rcases hx with ⟨N,hN⟩
+  rcases hy with ⟨M,hM⟩
+  use max N M
+  intro n hn
+  have hN := hN n (le_of_max_le_left hn)
+  have hM := hM n (le_of_max_le_right hn)
+  calc
+     dist (x.x n + y.x n) (a + b) ≤ dist (x.x n) a + dist (y.x n) b := dist_add_add_le (x.x n) (y.x n) a b
+     _ < ε/2 + ε/2 := by linarith
+     _ = ε  := by ring
 -- For exercise 2
 lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≤ b) :
     a ≤ b := by
-  sorry
+  contrapose! h
+  have h1 : a - b > 0 := by linarith
+  apply hx at h1
+  rcases h1 with ⟨N,hN⟩
+  use N
+  have hN1 := Nat.le_refl N
+  apply hN at hN1
+  have hN : a - (x.x N) < a - b := by
+    calc
+      a - (x.x N) ≤ dist (x.x N) a := by
+        simp only [dist]
+        rw[abs_sub_comm]
+        exact le_abs_self (a - x.x N)
+      _ < a - b := by linarith
+  linarith
 
 -- For exercise 2
 lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≥ b) :
