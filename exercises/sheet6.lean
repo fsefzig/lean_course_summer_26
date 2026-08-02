@@ -161,11 +161,34 @@ Hint: a is also the limit of the sequence `u`.
 
 7) Prove the at least one of the lemmas below.
 -/
+noncomputable section
+instance : CoeFun RealSeq (fun _ => ℕ → ℝ) where
+  coe f := f.x
 
 theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
     ∃ sup : upperBounds S, ∀ b : upperBounds S, sup ≤ b := by
-
-
+    classical
+    apply Set.nonempty_def.mp at hS
+    have hy : ∀ s ∉ upperBounds S, ∃ y ∈ S, y > s := by
+      intro s hs
+      apply Set.notMem_setOf_iff.mp at hs
+      simp at hs
+      exact hs
+    choose y hy using hy
+    rcases hS with ⟨l,hl⟩
+    let rec sequences : ℕ → ℝ × ℝ × ℝ
+    | 0 => ⟨u,l,(u+l)/2⟩
+    | k + 1 =>
+      if h : (sequences k).2.2 ∈ upperBounds S then
+        ⟨(sequences k).2.2,(sequences k).2.1,((sequences k).2.2+(sequences k).2.1)/2⟩
+      else
+        ⟨(sequences k).1,y (sequences k).2.2 h,((sequences k).1+y (sequences k).2.2 h)/2⟩
+    let f : (ℝ × ℝ × ℝ) → ℝ := fun x ↦ x.1
+    let g : (ℝ × ℝ × ℝ) → ℝ := fun x ↦ x.2.1
+    have (u : RealSeq) := f ∘ sequences
+    have (l : RealSeq) := g ∘ sequences
+    have hl : l.x n
+end
 
 /-
 Bonus! think about how to prove that every real number has a decimal expansion.
