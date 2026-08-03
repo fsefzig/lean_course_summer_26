@@ -10,17 +10,17 @@ namespace MySequences
 
 /-- The sum of two convergent sequences converges to the sum of their limits. -/
 lemma tends_to_add {x y : RealSeq} {a b : ℝ}
-    (hx : tends_to x a) (hy : tends_to y b) :
-    tends_to ⟨fun n ↦ x n + y n⟩ (a + b) := by
+    (hx : TendsTo x a) (hy : TendsTo y b) :
+    TendsTo ⟨fun n ↦ x n + y n⟩ (a + b) := by
   sorry
 
 -- For exercise 2
-lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≤ b) :
+lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (h : ∀ n, x n ≤ b) :
     a ≤ b := by
   sorry
 
 -- For exercise 2
-lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≥ b) :
+lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (h : ∀ n, x n ≥ b) :
     a ≥ b := by
   sorry
 
@@ -36,16 +36,16 @@ Use `continuousAt_iff_seqContinuousAt` for the exercise.
 You may find `Function.comp_apply` useful when simplifying compositions.
 -/
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
-    (hf : continuousAt f a) (hg : continuousAt g (f a)) :
-    continuousAt (g ∘ f) a := by
+    (hf : ContinuousAt f a) (hg : ContinuousAt g (f a)) :
+    ContinuousAt (g ∘ f) a := by
   sorry
 
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
 -/
 lemma continuous_sum_of_continuous {f g : ℝ → ℝ} {a : ℝ}
-    (hf : continuousAt f a) (hg : continuousAt g a) :
-    continuousAt (f + g) a := by
+    (hf : ContinuousAt f a) (hg : ContinuousAt g a) :
+    ContinuousAt (f + g) a := by
   sorry
 
 end MyFunctions

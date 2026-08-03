@@ -12,7 +12,7 @@ example (x : ℝ) : ⌈x⌉ ≥ x := by exact Int.le_ceil x
 
 #check one_div_le
 
-theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
+theorem nat_one_div_le {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
   by_cases h : ε ≤ 1
   · use ⌈1 / ε⌉.toNat
     refine ⟨Nat.ceil_pos.mpr (show 0 < ⌈1 / ε⌉ by positivity), ?_⟩
@@ -31,9 +31,9 @@ theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ)
 Show that convergence can be expressed in terms of rational numbers. Use the above exercise.
 -/
 theorem exericse2 {x : RealSeq} (a : ℝ) (hx : ∀ δ : ℕ, δ > 0 → ∃ N, ∀ n≥ N, dist (x n) a < 1 / δ)
-  : tends_to x a := by
+  : TendsTo x a := by
   intro ε hε
-  obtain ⟨δ, hδ, h⟩ := exercise1 hε
+  obtain ⟨δ, hδ, h⟩ := nat_one_div_le hε
   obtain ⟨N, hN⟩ := hx δ hδ
   use N
   intro n hn
@@ -46,7 +46,7 @@ Hint below:
 -/
 #check Rat.dist_cast
 
-theorem exercise3 {x : RatSeq} : isCauchy x ↔ isCauchyReal x := by
+theorem exercise3 {x : RatSeq} : IsCauchy x ↔ IsCauchyReal x := by
   constructor
   · intro h ε hε
     obtain ⟨N, hN⟩ := h ε hε
@@ -62,7 +62,7 @@ theorem exercise3 {x : RatSeq} : isCauchy x ↔ isCauchyReal x := by
 /-
 Finally, show that convergent sequences are Cauchy sequences.
 -/
-theorem exercise4 {x : RealSeq} (a : ℝ) (hx : tends_to x a) : isCauchyReal x := by
+theorem exercise4 {x : RealSeq} (a : ℝ) (hx : TendsTo x a) : IsCauchyReal x := by
   intro ε hε
   obtain ⟨N, hN⟩ := hx (ε / 2) (by positivity)
   use N
@@ -80,7 +80,7 @@ Finally, define a sequence of real numbers that does not converge.
 def my_diverging_sequence : RealSeq where
   x n := (-1 : ℝ) ^ n
 
-theorem exercise5 : ¬ ∃ a : ℝ, tends_to my_diverging_sequence a := by
+theorem exercise5 : ¬ ∃ a : ℝ, TendsTo my_diverging_sequence a := by
   let x := my_diverging_sequence
   intro ⟨a, ha⟩
   obtain ⟨N, hN⟩ := ha 1 Real.zero_lt_one

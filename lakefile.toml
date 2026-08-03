@@ -32,6 +32,7 @@ roots = [
   "LectureNotes.lecture5.examples5",
   "LectureNotes.lecture6.examples6",
   "LectureNotes.lecture7.examples7",
+  "LectureNotes.lecture8.examples8",
 ]
 
 [[lean_lib]]
