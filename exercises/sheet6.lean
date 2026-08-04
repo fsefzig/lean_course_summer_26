@@ -162,9 +162,6 @@ Hint: a is also the limit of the sequence `u`.
 7) Prove the at least one of the lemmas below.
 -/
 noncomputable section
-instance : CoeFun RealSeq (fun _ => ℕ → ℝ) where
-  coe f := f.x
-
 theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
     ∃ sup : upperBounds S, ∀ b : upperBounds S, sup ≤ b := by
     classical
@@ -185,9 +182,21 @@ theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
         ⟨(sequences k).1,y (sequences k).2.2 h,((sequences k).1+y (sequences k).2.2 h)/2⟩
     let f : (ℝ × ℝ × ℝ) → ℝ := fun x ↦ x.1
     let g : (ℝ × ℝ × ℝ) → ℝ := fun x ↦ x.2.1
-    have (u : RealSeq) := f ∘ sequences
-    have (l : RealSeq) := g ∘ sequences
-    have hl : l.x n
+    have h : ∀ (f : ℕ → ℝ), ∃ u : RealSeq, u = f := by
+      exact fun f ↦ exists_apply_eq_apply RealSeq.x { x := f }
+    choose h hh using h
+    let u1 := h (f ∘ sequences)
+    let l1 := h (g ∘ sequences)
+    have hl1 : ∀ n, l1 n ∈ S := by
+      intro n
+      induction n with
+      | zero =>
+        simp[l1,hh,g]
+        have h : sequences 0 = ⟨u,l,(u+l)/2⟩ := by
+          sorry
+        exact Set.mem_of_eq_of_mem (congrArg Prod.fst (congrArg Prod.snd h)) hl
+      | succ => sorry
+    sorry
 end
 
 /-
