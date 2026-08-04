@@ -70,11 +70,8 @@ You may find `Function.comp_apply` useful when simplifying compositions.
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : ContinuousAt f a) (hg : ContinuousAt g (f a)) :
     ContinuousAt (g ∘ f) a := by
-  rw [continuous_at_iff_seq_continuous_at]
-  intro x hx
-  rw [continuous_at_iff_seq_continuous_at] at hf hg
-  exact hg  ⟨fun n => f (x n)⟩ (hf x hx)
-
+  rw [continuous_at_iff_seq_continuous_at] at *
+  exact fun x hx => hg  ⟨fun n => f (x n)⟩ (hf x hx)
 
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
