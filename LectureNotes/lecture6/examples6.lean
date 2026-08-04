@@ -182,24 +182,24 @@ We are ready to define Cauchy sequences and limits of sequences.
 Note the type coercions in the definitions, including those for `ε`, `n`, `m`,
 and `N`.
 -/
-def isCauchy (x : RatSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
+def IsCauchy (x : RatSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
 
-def tends_toRat (x : RatSeq) (a : ℚ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
+def TendsToRat (x : RatSeq) (a : ℚ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
 
-def isCauchyReal (x : RealSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
+def IsCauchyReal (x : RealSeq) := ∀ ε > 0, ∃ N, ∀ m≥ N, ∀ n≥ N, dist (x m) (x n) < ε
 
-abbrev tends_to (x : RealSeq) (a : ℝ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
+abbrev TendsTo (x : RealSeq) (a : ℝ) := ∀ ε > 0, ∃ N, ∀ n≥ N, dist (x n) a < ε
 
 
 -- We can evaluate `tends_to` on a sequence of rational numbers.
-example (x : RatSeq) (a : ℝ) : tends_to x a := by sorry
+example (x : RatSeq) (a : ℝ) : TendsTo x a := by sorry
 
 -- Find the proof of this on the exercise sheet.
-lemma isCauchy_toReal (x : RatSeq) : isCauchy x → isCauchyReal x := by
+lemma is_cauchy_toReal (x : RatSeq) : IsCauchy x → IsCauchyReal x := by
   sorry
 
 -- This is essentially the definition of the real numbers.
-theorem real_numbers_complete {x : RealSeq} (hx : isCauchyReal x) : ∃ a : ℝ, tends_to x a := by
+theorem real_numbers_complete {x : RealSeq} (hx : IsCauchyReal x) : ∃ a : ℝ, TendsTo x a := by
   sorry
 
 #check ℝ --ctrl + click to see the actual definition!
@@ -212,7 +212,7 @@ positive number.
 
 #check @eq_of_forall_dist_le _ _ a b
 
-lemma tends_toReal_unique {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (hy : tends_to x b) :
+lemma tends_toReal_unique {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (hy : TendsTo x b) :
   a = b := by
   apply eq_of_forall_dist_le
   intro ε hε
@@ -238,9 +238,9 @@ Bonus: Finally we could use a structure to define the type of Cauchy sequences!
 
 structure RatCauchySeq where
   x : RatSeq
-  isCauchy : isCauchy x
+  isCauchy : IsCauchy x
 
-example : RatCauchySeq ≃ {x : RatSeq | isCauchy x} := by
+example : RatCauchySeq ≃ {x : RatSeq | IsCauchy x} := by
   exact
     { toFun := fun x ↦ ⟨x.x, x.isCauchy⟩
       invFun := fun x ↦ ⟨x.1, x.2⟩
@@ -248,7 +248,7 @@ example : RatCauchySeq ≃ {x : RatSeq | isCauchy x} := by
       right_inv := fun _ ↦ rfl }
 
 --By using a structure instead of a subtype we get direct access to the fields of the structure.
-example (x : RatCauchySeq) : isCauchy x.x := x.isCauchy
+example (x : RatCauchySeq) : IsCauchy x.x := x.isCauchy
 
 
 /-

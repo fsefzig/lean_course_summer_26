@@ -5,17 +5,18 @@ open MySequences
 
 namespace MyFunctions
 
-def continuousAt (f : ℝ → ℝ) (a : ℝ) : Prop :=
+def ContinuousAt (f : ℝ → ℝ) (a : ℝ) : Prop :=
   ∀ ε > 0, ∃ δ > 0, ∀ y, dist y a < δ → dist (f y) (f a) < ε
 
-def continuousOn (f : ℝ → ℝ) : Prop :=
-  ∀ a, continuousAt f a
+-- This is called `Continuous f` in the library and defined in terms of open sets.
+def ContinuousOn (f : ℝ → ℝ) : Prop :=
+  ∀ a, ContinuousAt f a
 
-def seqContinuousAt (f : ℝ → ℝ) (a : ℝ) : Prop :=
-  ∀ x : RealSeq , tends_to x a → tends_to ⟨fun n => f (x n)⟩ (f a)
+def SeqContinuousAt (f : ℝ → ℝ) (a : ℝ) : Prop :=
+  ∀ x : RealSeq , TendsTo x a → TendsTo ⟨fun n => f (x n)⟩ (f a)
 
-theorem continuousAt_iff_seqContinuousAt (f : ℝ → ℝ) (a : ℝ) :
-  continuousAt f a ↔ seqContinuousAt f a := by
+theorem continuous_at_iff_seq_continuous_at (f : ℝ → ℝ) (a : ℝ) :
+  ContinuousAt f a ↔ SeqContinuousAt f a := by
   constructor
   · intro h x hx ε hε
     obtain ⟨δ, hδ⟩ := h ε hε
@@ -25,7 +26,7 @@ theorem continuousAt_iff_seqContinuousAt (f : ℝ → ℝ) (a : ℝ) :
     exact hδ.2 _ (hN n hn)
   intro hseq
   by_contra h
-  unfold continuousAt at h
+  unfold ContinuousAt at h
   push Not at h
   obtain ⟨ε, hε, h⟩ := h
   have hyn : ∀ n : ℕ, ∃ y : ℝ, dist y a < 1 / (n + 1 : ℝ) ∧ dist (f y) (f a) ≥ ε := by
@@ -34,7 +35,7 @@ theorem continuousAt_iff_seqContinuousAt (f : ℝ → ℝ) (a : ℝ) :
     exact h
   classical -- needed to computationally choose a sequence of y's
   choose y hy using hyn -- axiom of choice
-  have hytends : tends_to ⟨y⟩ a := by
+  have hytends : TendsTo ⟨y⟩ a := by
     intro ε' hε'
     obtain ⟨N, hN⟩ := exists_nat_one_div_lt hε' --useful lemma to obtain N such that 1/(N+1) < ε'
     use N
@@ -45,8 +46,8 @@ theorem continuousAt_iff_seqContinuousAt (f : ℝ → ℝ) (a : ℝ) :
       · exact Nat.cast_add_one_pos N
       exact add_le_add_left (Nat.cast_le.mpr hn) 1
     linarith
-  have hyf : ¬ tends_to ⟨fun n => f (y n)⟩ (f a) := by
-    unfold tends_to
+  have hyf : ¬ TendsTo ⟨fun n => f (y n)⟩ (f a) := by
+    unfold TendsTo
     push Not
     use ε
     refine ⟨hε, ?_⟩
@@ -67,7 +68,7 @@ variable {S : Set ℝ} {x : RealSeq}
 #check Set.range x --the set of all values of a sequence, i.e. {x n | n : ℕ} = image of x.
 
 lemma tends_to_of_bounded_increasing {x : RealSeq} (hx : ∀ n, x n ≤ x (n + 1))
-  (hbdd : ∃ M, ∀ y ∈ Set.range x, y ≤ M) : tends_to x (sSup (Set.range x)) := by
+  (hbdd : ∃ M, ∀ y ∈ Set.range x, y ≤ M) : TendsTo x (sSup (Set.range x)) := by
   have hdist : ∀ n, dist (x n) (sSup (Set.range x)) = sSup (Set.range x) - x n := by
       intro n
       have hle : 0 ≤ sSup (Set.range x) - x n := by
@@ -75,7 +76,7 @@ lemma tends_to_of_bounded_increasing {x : RealSeq} (hx : ∀ n, x n ≤ x (n + 1
         exact le_csSup hbdd (Set.mem_range_self n)
       rw[dist_comm, Real.dist_eq, abs_of_nonneg hle]
   by_contra hcon
-  unfold tends_to at hcon
+  unfold TendsTo at hcon
   push Not at hcon
   obtain ⟨ε, hε, h⟩ := hcon
   have hN : ∀ n , sSup (Set.range x) - x n ≥ ε := by
