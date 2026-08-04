@@ -13,7 +13,7 @@ example (x : ℝ) : ⌈x⌉ ≥ x := by exact Int.le_ceil x
 #check one_div_le
 #check inv_eq_one_div
 
-theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
+theorem nat_one_div_le {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
   by_cases h : ε ≤ 1
   · use ⌈1 / ε⌉.toNat
     refine ⟨Nat.ceil_pos.mpr (show 0 < ⌈1 / ε⌉ by positivity), ?_⟩
@@ -32,15 +32,14 @@ theorem exercise1 {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ)
 Show that convergence can be expressed in terms of rational numbers. Use the above exercise.
 -/
 theorem exericse2 {x : RealSeq} (a : ℝ) (hx : ∀ δ : ℕ, δ > 0 → ∃ N, ∀ n≥ N, dist (x n) a < 1 / δ)
-  : tends_to x a := by
-  unfold tends_to
+  : TendsTo x a := by
   intro ε hε
-  obtain ⟨δ, hδ⟩ := exercise1 hε
-  obtain ⟨N, hN⟩ := hx δ hδ.1
+  obtain ⟨δ, hδ, h⟩ := nat_one_div_le hε
+  obtain ⟨N, hN⟩ := hx δ hδ
   use N
   intro n hn
-  have h := hN n hn
-  exact lt_of_lt_of_le h hδ.2
+  have h' := hN n hn
+  exact lt_of_lt_of_le h' h
 
 /-
 Show that rational Cauchy sequences are also Cauchy sequences of real numbers and vice versa.
@@ -48,15 +47,15 @@ Hint below:
 -/
 #check Rat.dist_cast
 
-theorem exercise3 {x : RatSeq} : isCauchy x ↔ isCauchyReal x := by
+theorem exercise3 {x : RatSeq} : IsCauchy x ↔ IsCauchyReal x  := by
   constructor <;>
-  · unfold isCauchy isCauchyReal RatSeq.toRealSeq
+  · unfold IsCauchy IsCauchyReal RatSeq.toRealSeq
     simp [Rat.dist_cast]
 
 /-
 Finally, show that convergent sequences are Cauchy sequences.
 -/
-theorem exercise4 {x : RealSeq} (a : ℝ) (hx : tends_to x a) : isCauchyReal x := by
+theorem exercise4 {x : RealSeq} (a : ℝ) (hx : TendsTo x a) : IsCauchyReal x := by
   intro ε hε
   obtain ⟨N, hN⟩ := hx (ε / 2) (by positivity)
   use N
@@ -77,8 +76,8 @@ def my_diverging_sequence : RealSeq where
 theorem fiveadd : (5 : ℝ) = @Nat.cast ℝ Real.instNatCast 5 := by
   exact Eq.symm (Real.ext_cauchy rfl)
 
-theorem exercise5 : ¬ ∃ a : ℝ, tends_to my_diverging_sequence a := by
-  unfold tends_to my_diverging_sequence
+theorem exercise5 : ¬ ∃ a : ℝ, TendsTo my_diverging_sequence a := by
+  unfold TendsTo my_diverging_sequence
   dsimp
   intro ⟨a, ha⟩
   obtain ⟨N, hN⟩ := ha 1 (by simp)

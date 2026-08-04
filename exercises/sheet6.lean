@@ -19,9 +19,9 @@ theorem dist_ineq {a b c d : ℝ} : dist (a + b) (c + d) ≤ dist a c + dist b d
 
 /-- The sum of two convergent sequences converges to the sum of their limits. -/
 lemma tends_to_add {x y : RealSeq} {a b : ℝ}
-    (hx : tends_to x a) (hy : tends_to y b) :
-    tends_to ⟨fun n ↦ x n + y n⟩ (a + b) := by
-  unfold tends_to at *
+    (hx : TendsTo x a) (hy : TendsTo y b) :
+    TendsTo ⟨fun n ↦ x n + y n⟩ (a + b) := by
+  unfold TendsTo at *
   dsimp at *
   intro ε hε
   obtain ⟨xN, hxN⟩ := hx (ε/2) (by positivity)
@@ -36,9 +36,9 @@ lemma tends_to_add {x y : RealSeq} {a b : ℝ}
     _ = ε := by norm_num
 
 -- For exercise 2
-lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≤ b) :
+lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (h : ∀ n, x n ≤ b) :
     a ≤ b := by
-  unfold tends_to at hx
+  unfold TendsTo at hx
   by_contra! hc
   obtain ⟨N, hN⟩ := hx (a - b) (by positivity)
   have h₁ := hN (N+1) (by simp)
@@ -48,9 +48,9 @@ lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n
   linarith
 
 -- For exercise 2
-lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : tends_to x a) (h : ∀ n, x n ≥ b) :
+lemma tends_to_ge_of_ge {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (h : ∀ n, x n ≥ b) :
     a ≥ b := by
-  unfold tends_to at hx
+  unfold TendsTo at hx
   by_contra! hc
   obtain ⟨N, hN⟩ := hx (b - a) (by positivity)
   have h₁ := hN (N+1) (by simp)
@@ -71,9 +71,9 @@ Use `continuousAt_iff_seqContinuousAt` for the exercise.
 You may find `Function.comp_apply` useful when simplifying compositions.
 -/
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
-    (hf : continuousAt f a) (hg : continuousAt g (f a)) :
-    continuousAt (g ∘ f) a := by
-  unfold continuousAt at *
+    (hf : ContinuousAt f a) (hg : ContinuousAt g (f a)) :
+    ContinuousAt (g ∘ f) a := by
+  unfold ContinuousAt at *
   intro ε hε
   obtain ⟨δg, hδg⟩ := hg ε hε
   obtain ⟨δf, hδf⟩ := hf δg hδg.1
@@ -90,9 +90,9 @@ lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
 Use the above lemma to prove that the sum of two continuous functions is continuous.
 -/
 lemma continuous_sum_of_continuous {f g : ℝ → ℝ} {a : ℝ}
-    (hf : continuousAt f a) (hg : continuousAt g a) :
-    continuousAt (f + g) a := by
-  unfold continuousAt at *
+    (hf : ContinuousAt f a) (hg : ContinuousAt g a) :
+    ContinuousAt (f + g) a := by
+  unfold ContinuousAt at *
   intro ε hε
   obtain ⟨δg, hδg⟩ := hg (ε/2) <| by positivity
   obtain ⟨δf, hδf⟩ := hf (ε/2) <| by positivity
