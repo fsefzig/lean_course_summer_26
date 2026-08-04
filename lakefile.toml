@@ -24,6 +24,11 @@ name = "LeanCourseSummer26"
 
 [[lean_lib]]
 name = "Exercises"
+srcDir = "."
+roots = [
+  "exercises.sheet5",
+  "exercises.sheet6"
+]
 
 [[lean_lib]]
 name = "LectureNotes"

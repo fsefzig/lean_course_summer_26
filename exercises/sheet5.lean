@@ -94,7 +94,8 @@ theorem exercise5 : ¬ ∃ a : ℝ, TendsTo my_diverging_sequence a := by
   norm_num at x
 
 #check dist
-#check Quotient.ind
+#check Quot.rec
+#check Quot.ind
 #check Eq
 
 

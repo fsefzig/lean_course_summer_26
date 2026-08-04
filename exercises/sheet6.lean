@@ -11,6 +11,7 @@ namespace MySequences
 #check dist_triangle
 #check norm_add_le
 
+#check dist_add_add_le
 theorem dist_ineq {a b c d : ℝ} : dist (a + b) (c + d) ≤ dist a c + dist b d := by
   repeat rw [Real.dist_eq]
   calc |a + b - (c + d)|

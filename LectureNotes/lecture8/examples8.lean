@@ -1,6 +1,6 @@
 import LectureNotes.lecture7.examples7
-import Exercises.Sheet5
-import Exercises.Sheet6
+import exercises.sheet5
+import exercises.sheet6
 
 namespace MyFunctions
 
