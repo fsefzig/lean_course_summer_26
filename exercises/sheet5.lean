@@ -95,3 +95,47 @@ theorem exercise5 : ¬ ∃ a : ℝ, tends_to my_diverging_sequence a := by
   norm_num at x
 
 #check dist
+#check Quotient.ind
+#check Eq
+
+
+inductive MQuot.{u} {α : Sort u} (r : α → α → Prop) : Sort (u + 1) where
+| mk (a : α) : MQuot r
+-- | sound {a b : α} (h : r a b) : MQuot.mk a = MQuot.mk b
+
+-- MQuot.rec.{u v} {α : Sort u} {r : α → α → Prop} {motive : MQuot r → Sort v}
+-- (mk : (a : α) → motive (MQuot.mk a))
+-- (sound :
+--  {a b : α} → (h : r a b) →
+--  Eq.ndrec (mk a) (MQuot.sound h) = mk b
+-- ) :
+--  (x : MQuot r) → motive x
+
+#check Eq.ndrec
+
+def eqz : ℕ → Prop
+| 0 => True
+| Nat.succ _ => False
+
+theorem not_succ (n : ℕ) : ¬(Nat.succ n = 0) := by
+  exact Nat.add_one_ne_zero n
+
+
+#print axioms Nat.add_one_ne_zero
+
+instance natDecEq (a : ℕ) (b : ℕ) : Decidable (a = b) := match a, b with
+| Nat.succ pa, Nat.succ pb =>
+  match natDecEq pa pb with
+  | Decidable.isTrue h => Decidable.isTrue (h ▸ rfl)
+  | Decidable.isFalse h => Decidable.isFalse (fun heq => h <| Nat.succ_injective heq)
+| Nat.zero, Nat.zero => Decidable.isTrue rfl
+| Nat.zero, Nat.succ p => Decidable.isFalse <| (Nat.add_one_ne_zero p).symm
+| Nat.succ p, Nat.zero => Decidable.isFalse <| Nat.add_one_ne_zero p
+
+#print axioms natDecEq
+
+#check Nat.noConfusion
+#check Nat.noConfusionType
+
+inductive MEq.{u} {α : Sort u} : α → α → Sort (u + 1) where
+| rfl (a : α) : MEq a a
