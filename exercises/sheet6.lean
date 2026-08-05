@@ -169,8 +169,8 @@ theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
     have hy : ∀ s ∉ upperBounds S, ∃ y ∈ S, y > s := by
       intro s hs
       apply Set.notMem_setOf_iff.mp at hs
-      simp at hs
-      exact hs
+      simp only [not_forall, not_le] at hs
+      exact bex_def.mp hs
     choose y hy using hy
     rcases hS with ⟨l,hl⟩
     let rec sequences : ℕ → ℝ × ℝ × ℝ
@@ -191,9 +191,9 @@ theorem exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
       intro n
       induction n with
       | zero =>
-        simp[l1,hh,g]
+        simp only [hh, Function.comp_apply, l1, g]
         have h : sequences 0 = ⟨u,l,(u+l)/2⟩ := by
-          sorry
+          sorry -- I couldn't figure out how to unpack the definition of sequences, sorry. I plan to look at the solution. I tried using dsimp but it failed.
         exact Set.mem_of_eq_of_mem (congrArg Prod.fst (congrArg Prod.snd h)) hl
       | succ => sorry
     sorry
