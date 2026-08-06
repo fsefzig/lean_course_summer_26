@@ -11,8 +11,31 @@ Hint: Calc and limit laws and `continuous_at_iff_tends_to`.
 Use exercise1 to show compute the derivative of monomial functions.
 Hint: Induction on n.
 -/
-lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = fun x : ℝ => n * x ^ (n - 1) := by
-  sorry
+lemma hasDerivExt {f f' f'' : ℝ → ℝ} (hderiv : HasDeriv f f') (heq : f' = f'') : HasDeriv f f'' := by
+  rw[heq] at hderiv
+  exact hderiv
+
+lemma deriv_power (n : ℕ) : HasDeriv (fun x => x ^ n) (fun x : ℝ => n * x ^ (n - 1)) := by
+  induction n with
+  | zero => simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one]
+            exact deriv_const 1
+  | succ n ih =>
+  by_cases hn : n = 0
+  · rw[hn]
+    have hd := deriv_affine 1 0
+    simp only [one_mul, add_zero, const_one, zero_add, pow_one, Nat.cast_one, tsub_self, pow_zero,
+      mul_one] at *
+    exact hd
+  have hprod : (fun x => x ^ (n + 1) : ℝ → ℝ )= (fun x => 1*x + 0) * (fun x => (x ^ n)) :=
+    by ext x; rw [Pi.mul_apply]; ring
+  have hmul := deriv_mul (⟨fun x => 1, deriv_affine 1 0⟩) (⟨fun x => n * x ^ (n - 1), ih⟩)
+  rw[← deriv_of_has_deriv ih, ← deriv_of_has_deriv (deriv_affine 1 0), ← hprod] at hmul
+  refine hasDerivExt hmul ?_
+  ext x
+  simp only [const_one, one_mul, add_zero, Pi.add_apply, Pi.mul_apply, Nat.cast_add, Nat.cast_one,
+    add_tsub_cancel_right]
+  ring_nf
+  rw[add_comm, mul_pow_sub_one hn x]
 
 /-
 Prove the fact that the derivate vanishes at a local minimum.
