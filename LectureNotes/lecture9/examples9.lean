@@ -23,11 +23,19 @@ We define the Riemann integral by specializing Mathlib's box integral to one dim
   (and is defined to be `0` when the function is not integrable).
 -/
 
+variable (n : ℕ)
+
+#check Fin n → ℝ -- x ∈ R^n as function {0, ..., n-1} → ℝ
+
+-- the identification of `Fin 1 (= {0}) → ℝ` with `ℝ`.
 noncomputable abbrev ev := ContinuousLinearEquiv.funUnique (Fin 1) ℝ ℝ
+
+#check Box
 
 abbrev intervalToBox (a b : ℝ) (h : a < b) : Box (Fin 1) :=
   Box.mk (fun _ : Fin 1 => a) (fun _ : Fin 1 => b) (fun _ => h)
 
+-- map: Intervals × ℝ -> ℝ which is additive in the boxes and linear in the real variable.
 noncomputable abbrev riemannVolume : (Fin 1 →ᵇᵃ[⊤] ℝ →L[ℝ] ℝ) :=
   BoxAdditiveMap.volume
 
@@ -35,6 +43,7 @@ noncomputable abbrev riemannSum {a b : ℝ} (f : ℝ → ℝ) (hab : a < b)
     (t : TaggedPrepartition (intervalToBox a b hab)) : ℝ :=
   BoxIntegral.integralSum (fun g => f (ev g)) riemannVolume t
 
+-- specialisation of the libary defn
 def HasIntegral {a b : ℝ} (f : ℝ → ℝ) (hab : a < b) (α : ℝ) : Prop :=
   BoxIntegral.HasIntegral (intervalToBox a b hab) (IntegrationParams.Riemann)
   (fun g => f (ev g)) (riemannVolume) α
@@ -59,7 +68,7 @@ theorem Integrable.hasRiemannIntegral {a b : ℝ} (f : ℝ → ℝ) (hab : a < b
 -- the property that the distances between the tag and the corresponding box is less than δ
 #check TaggedPrepartition.IsSubordinate
 
-
+-- special case defn is equivalent to the general defn of HasIntegral
 theorem hasIntegral_iff {a b : ℝ} {f : ℝ → ℝ} {hab : a < b} {α : ℝ} :
     HasIntegral f hab α ↔ ∀ ε > 0, ∃ δ : Set.Ioi 0,
     ∀ t : TaggedPrepartition (intervalToBox a b hab),

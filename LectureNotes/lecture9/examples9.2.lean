@@ -39,10 +39,6 @@ noncomputable def tagValue {f : ℝ → ℝ} (hf : Differentiable f)
     (J : Box (Fin 1)) : ℝ :=
   Classical.choose (mean_value_theorem (J.lower_lt_upper 0) hf)
 
-lemma tagValue_mem {f : ℝ → ℝ} (hf : Differentiable f) (J : Box (Fin 1)) :
-    tagValue hf J ∈ Set.Ioo (J.lower 0) (J.upper 0) := by
-  exact (Classical.choose_spec (mean_value_theorem (J.lower_lt_upper 0) hf)).1
-
 lemma tagValue_feq {f : ℝ → ℝ} (hf : Differentiable f) (J : Box (Fin 1)) :
     (J.upper 0 - J.lower 0) * deriv f (tagValue hf J) =
       f (J.upper 0) - f (J.lower 0) := by
@@ -57,11 +53,15 @@ noncomputable def mvtTag {f : ℝ → ℝ} (hf : Differentiable f)
     (J : Box (Fin 1)) : Fin 1 → ℝ :=
   fun _ => tagValue hf J
 
+lemma tagValue_mem {f : ℝ → ℝ} (hf : Differentiable f) (J : Box (Fin 1)) :
+    tagValue hf J ∈ Set.Ioo (J.lower 0) (J.upper 0) := by
+  exact (Classical.choose_spec (mean_value_theorem (J.lower_lt_upper 0) hf)).1
+
 lemma mvtTag_mem_Icc {f : ℝ → ℝ} (hf : Differentiable f) (J : Box (Fin 1)) :
     mvtTag hf J ∈ Box.Icc J := by
   rw [Box.Icc_def]
   constructor <;> intro i <;> fin_cases i
-  · exact (tagValue_mem hf J).1.le
+  · exact ((tagValue_mem) hf J).1.le
   · exact (tagValue_mem hf J).2.le
 
 open scoped Classical in
