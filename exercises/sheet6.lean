@@ -15,7 +15,8 @@ namespace MySequences
 theorem dist_ineq {a b c d : ℝ} : dist (a + b) (c + d) ≤ dist a c + dist b d := by
   repeat rw [Real.dist_eq]
   calc |a + b - (c + d)|
-    _ = |a - c + (b - d)| := by congr; linarith
+    _ = |a - c + (b - d)| := by
+      congr; linarith
   exact norm_add_le (a - c) (b - d)
 
 /-- The sum of two convergent sequences converges to the sum of their limits. -/
@@ -166,28 +167,53 @@ structure SeqEntry : Type where
   hl : l ∈ S
   hu : u ∈ upperBounds S
 
-def seq : ℕ → ℝ × ℝ
-| 0 => ⟨Classical.choose hS, Classical.choose hbdd, ⟩
-| Nat.succ n => by
-    let ⟨l, u⟩ := seq n
+def seq : ℕ → @SeqEntry S
+| 0 => ⟨
+  Classical.choose hS,
+  Classical.choose hbdd,
+  Classical.choose_spec hS,
+  Classical.choose_spec hbdd⟩
+| Nat.succ n =>
+    let ⟨l, u, hl, hu⟩ := seq n
     let m := l + u / 2
-    by_cases h : m ∈ upperBounds S
-    · exact ⟨l, m⟩
-    · unfold upperBounds at h
-      dsimp at h; push Not at h
-      exact ⟨Classical.choose h, u⟩
+    haveI : Decidable (m ∈ upperBounds S)
+      := Classical.dec (m ∈ upperBounds S)
+    if h : m ∈ upperBounds S
+    then ⟨l, m, hl, h⟩
+    else
+      have h' : ∃(a : ℝ), a ∈ S ∧ m < a := by
+        unfold upperBounds at h; dsimp at h
+        push Not at h
+        exact h
+      ⟨Classical.choose h', u,
+      (Classical.choose_spec h').1, hu⟩
 
-abbrev seqL (n : ℕ) : ℝ := (seq hS hbdd n).fst
-abbrev seqU (n : ℕ) : ℝ := (seq hS hbdd n).snd
 
-theorem fstIn {n : ℕ} : seqL hS hbdd n ∈ S := by
-  induction n with
-  | zero => sorry
-  | succ p hp =>
+abbrev seqL (n : ℕ) : ℝ := (seq hS hbdd n).l
+abbrev seqU (n : ℕ) : ℝ := (seq hS hbdd n).u
+
+def intervalOf : @SeqEntry S → Set ℝ
+| SeqEntry.mk l u _ _ => Set.Icc l u
+
+theorem elem_lt_ub : Classical.choose hS ≤ Classical.choose hbdd := by
+  sorry
+
+theorem incr {a : ℕ} : seqL hS hbdd a ≤ seqL hS hbdd (a+1) := by
+  induction a with
+  | zero =>
     unfold seqL seq
     dsimp
+    by_cases! h : (seq hS hbdd 0).l + (seq hS hbdd 0).u / 2 ∈ upperBounds S
+    · simp [h]; unfold seq; dsimp; rfl
+    · simp only [if_neg h, h]
+      unfold seq; dsimp
+      have hc := Classical.choose_spec hS
+      have hb := Classical.choose_spec hbdd
+      unfold upperBounds at hb
+      dsimp at hb
+      sorry
+  | succ p hp =>
     sorry
-end
 
 
 lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :

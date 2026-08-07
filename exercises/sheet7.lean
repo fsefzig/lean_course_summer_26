@@ -25,6 +25,7 @@ theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
 Use the theorem `deriv_at_max_zero` and the theorems below
 to prove Rolle's theorem from the lecture.
 -/
+-- Extreme value theorem
 theorem max_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : ContinuousOn f) :
     ∃ x ∈ Set.Icc a b, IsMaxOn f (Set.Icc a b) x := by
   sorry -- You don't have to prove this! This corresponds to `isCompact_Icc.exists_isMaxOn`.
@@ -61,6 +62,7 @@ lemma limit_of_nested_intervals {a b : ℕ → ℝ} {x : RealSeq} (hx : ∀ n, x
 Hint: Try to build a sequence of nested intervals containing a subsequence. Then apply the lemma.
 Note a < b is automatic (otherwise you get a contradiction)
 -/
+-- Bolzano weierstrass theorem
 theorem convergent_subsequence_of_bounded {x : RealSeq} {a b : ℝ} (hx : ∀ n, x n ∈ Set.Icc a b) :
     ∃ σ : ℕ → ℕ, ∃ c : Set.Icc a b, TendsTo ⟨(x ∘ σ)⟩ c := by
   sorry
