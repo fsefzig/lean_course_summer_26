@@ -31,17 +31,17 @@ lemma HasDeriv_power (n : ℕ) : HasDeriv (fun x => x ^ n) (fun x : ℝ => n * x
   | succ n hn =>
     by_cases! hn1 : n = 0
     · simp only [hn1, zero_add, pow_one, Nat.cast_one, tsub_self, pow_zero, mul_one]
-      exact deriv_x
+      exact HasDeriv_x
     simp only [pow_add, pow_one, Nat.cast_add, Nat.cast_one, add_tsub_cancel_right,add_mul,one_mul]
     have h : HasDeriv ((fun x ↦ x^n) * (fun x ↦ x)) (deriv (fun x ↦ x^n) * (fun x ↦ x) + (fun x ↦ x^n) * deriv  (fun x ↦ x)) := by
       refine deriv_mul ?_ ?_
       · use fun x ↦ ↑n * x ^ (n - 1)
       use fun x ↦ 1
-      exact deriv_x
+      exact HasDeriv_x
     have h1 : deriv (fun x ↦ x ^ n) = fun (x : ℝ) ↦ (↑n * x ^ (n - 1)) := by
       exact Eq.symm (deriv_of_has_deriv hn)
     have h2 : deriv (fun x ↦ x) = fun x ↦ 1 := by
-      exact Eq.symm (deriv_of_has_deriv deriv_x)
+      exact Eq.symm (deriv_of_has_deriv HasDeriv_x)
     have h3 {x : ℝ} : ↑n * x ^ (n - 1) * x + x ^ n = ↑n * x ^ n + x ^ n := by
       nth_rw 2[←pow_one x]
       rw[mul_assoc,←pow_add x (n-1) 1, Nat.sub_add_cancel]
