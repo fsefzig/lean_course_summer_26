@@ -14,12 +14,17 @@ Hint: Induction on n.
 lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = fun x : ℝ => n * x ^ (n - 1) := by
   induction n with
   | zero =>
+    have h : HasDeriv (fun x ↦ x^0) (const _ 0) := by
+      have h1 : (fun x ↦ x^0) = const ℝ 1 := by
+        exact const_def
+      rw[h1]
+      exact deriv_const 1
     refine Eq.symm (deriv_of_has_deriv ?_)
     simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one]
-    apply deriv_const
-  | succ =>
-    rename_i d hd
+  | succ n hn =>
     sorry
+
+
 
 /-
 Prove the fact that the derivate vanishes at a local minimum.
