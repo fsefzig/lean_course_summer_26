@@ -23,19 +23,15 @@ theorem dist_ineq {a b c d : ℝ} : dist (a + b) (c + d) ≤ dist a c + dist b d
 lemma tends_to_add {x y : RealSeq} {a b : ℝ}
     (hx : TendsTo x a) (hy : TendsTo y b) :
     TendsTo ⟨fun n ↦ x n + y n⟩ (a + b) := by
-  unfold TendsTo at *
-  dsimp at *
   intro ε hε
-  obtain ⟨xN, hxN⟩ := hx (ε/2) (by positivity)
-  obtain ⟨yN, hyN⟩ := hy (ε/2) (by positivity)
-  use max xN yN
-  intro n hn
-  calc dist (x.x n + y.x n) (a + b)
-    _ ≤ dist (x.x n) a + dist (y.x n) b := dist_ineq
-    _ < ε / 2 + ε / 2 := add_lt_add_of_lt_of_lt
-      (hxN n <| by linarith [le_max_left xN yN, hn])
-      (hyN n <| by linarith [le_max_right xN yN, hn])
-    _ = ε := by norm_num
+  obtain ⟨ N₁, hN₁ ⟩ := hx (ε / 2) (by positivity)
+  obtain ⟨ N₂, hN₂ ⟩ := hy (ε / 2) (by positivity)
+  refine ⟨max N₁ N₂, fun n hn => ?_⟩
+  calc
+    dist (x n + y n) (a + b) ≤ dist (x n) a + dist (y n) b := by
+      exact dist_add_add_le (x.x n) (y.x n) a b
+    _ < ε / 2 + ε / 2 := by linarith [hN₁ n (le_of_max_le_left hn), hN₂ n (le_of_max_le_right hn)]
+    _ = ε := by exact add_halves ε
 
 -- For exercise 2
 lemma tends_to_le_of_le {x : RealSeq} {a b : ℝ} (hx : TendsTo x a) (h : ∀ n, x n ≤ b) :
@@ -69,24 +65,24 @@ end MySequences
 namespace MyFunctions
 
 /-
-Use `continuousAt_iff_seqContinuousAt` for the exercise.
+Use `continuous_at_iff_seq_continuous_at` for the exercise.
 You may find `Function.comp_apply` useful when simplifying compositions.
 -/
 lemma continuous_comp_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : ContinuousAt f a) (hg : ContinuousAt g (f a)) :
     ContinuousAt (g ∘ f) a := by
-  unfold ContinuousAt at *
-  intro ε hε
-  obtain ⟨δg, hδg⟩ := hg ε hε
-  obtain ⟨δf, hδf⟩ := hf δg hδg.1
-  use δf
-  refine ⟨hδf.1, ?_⟩
-  intro y hy
-  repeat rw [Function.comp_apply]
-  exact hδg.2 (f y) <| hδf.2 y hy
+  rw [continuous_at_iff_seq_continuous_at] at *
+  exact fun x hx => hg  ⟨fun n => f (x n)⟩ (hf x hx)
+  -- unfold ContinuousAt at *
+  -- intro ε hε
+  -- obtain ⟨δg, hδg⟩ := hg ε hε
+  -- obtain ⟨δf, hδf⟩ := hf δg hδg.1
+  -- use δf
+  -- refine ⟨hδf.1, ?_⟩
+  -- intro y hy
+  -- repeat rw [Function.comp_apply]
+  -- exact hδg.2 (f y) <| hδf.2 y hy
 
-#check Pi.add_apply
-#check min_le_right
 
 /-
 Use the above lemma to prove that the sum of two continuous functions is continuous.
@@ -94,20 +90,24 @@ Use the above lemma to prove that the sum of two continuous functions is continu
 lemma continuous_sum_of_continuous {f g : ℝ → ℝ} {a : ℝ}
     (hf : ContinuousAt f a) (hg : ContinuousAt g a) :
     ContinuousAt (f + g) a := by
-  unfold ContinuousAt at *
-  intro ε hε
-  obtain ⟨δg, hδg⟩ := hg (ε/2) <| by positivity
-  obtain ⟨δf, hδf⟩ := hf (ε/2) <| by positivity
-  use min δf δg
-  refine ⟨by positivity [hδf.1, hδg.1], ?_⟩
-  intro y hy
-  repeat rw [Pi.add_apply]
-  have h₁ := hδf.2 y <| by linarith [min_le_left δf δg, hy]
-  have h₂ := hδg.2 y <| by linarith [min_le_right δf δg, hy]
-  calc dist (f y + g y) (f a + g a)
-    _ ≤ dist (f y) (f a) + dist (g y) (g a) := dist_ineq
-    _ < ε / 2 + ε / 2 := add_lt_add_of_lt_of_lt h₁ h₂
-    _ = ε := by norm_num
+  rw [continuous_at_iff_seq_continuous_at]
+  intro x hx
+  rw [continuous_at_iff_seq_continuous_at] at hf hg
+  exact tends_to_add (hf x hx) (hg x hx)
+  -- unfold ContinuousAt at *
+  -- intro ε hε
+  -- obtain ⟨δg, hδg⟩ := hg (ε/2) <| by positivity
+  -- obtain ⟨δf, hδf⟩ := hf (ε/2) <| by positivity
+  -- use min δf δg
+  -- refine ⟨by positivity [hδf.1, hδg.1], ?_⟩
+  -- intro y hy
+  -- repeat rw [Pi.add_apply]
+  -- have h₁ := hδf.2 y <| by linarith [min_le_left δf δg, hy]
+  -- have h₂ := hδg.2 y <| by linarith [min_le_right δf δg, hy]
+  -- calc dist (f y + g y) (f a + g a)
+  --   _ ≤ dist (f y) (f a) + dist (g y) (g a) := dist_ineq
+  --   _ < ε / 2 + ε / 2 := add_lt_add_of_lt_of_lt h₁ h₂
+  --   _ = ε := by norm_num
 
 end MyFunctions
 
@@ -155,71 +155,149 @@ Hint: a is also the limit of the sequence `u`.
 7) Prove the at least one of the lemmas about limits above.
 -/
 
-#check sSup {x : ℝ | x > 5}
-#print axioms Real.exists_isLUB
+lemma exists_of_ne_up {S : Set ℝ} (u : ℝ) (hu : ¬ u ∈ upperBounds S) :
+    ∃ y ∈ S, u < y := by
+  by_contra! h
+  exact hu h
 
-noncomputable section
-variable {S : Set ℝ} (hS : S.Nonempty) (hbdd : (upperBounds S).Nonempty)
+open scoped Classical in
+noncomputable def pointAbove {S : Set ℝ} (u : ℝ) (hu : ¬ u ∈ upperBounds S) :
+    {y : ℝ | y ∈ S ∧ u < y} :=
+  ⟨Classical.choose (exists_of_ne_up u hu), Classical.choose_spec (exists_of_ne_up u hu)⟩
 
-structure SeqEntry : Type where
-  l : ℝ
-  u : ℝ
-  hl : l ∈ S
-  hu : u ∈ upperBounds S
+-- If you don't want to use Nat.rec, you can also define this function recursively using pattern matching.
+open scoped Classical in
+noncomputable def boundary {S : Set ℝ} (l : S) (u : upperBounds S) : ℕ → ℝ × ℝ
+  | 0 => (l, u)
+  | n + 1 =>
+    let mid := (boundary l u n).1 + (boundary l u n).2 / 2
+    if hmid : mid ∈ upperBounds S then ((boundary l u n).1, mid)
+    else ((pointAbove mid hmid).val, (boundary l u n).2)
 
-def seq : ℕ → @SeqEntry S
-| 0 => ⟨
-  Classical.choose hS,
-  Classical.choose hbdd,
-  Classical.choose_spec hS,
-  Classical.choose_spec hbdd⟩
-| Nat.succ n =>
-    let ⟨l, u, hl, hu⟩ := seq n
-    let m := l + u / 2
-    haveI : Decidable (m ∈ upperBounds S)
-      := Classical.dec (m ∈ upperBounds S)
-    if h : m ∈ upperBounds S
-    then ⟨l, m, hl, h⟩
-    else
-      have h' : ∃(a : ℝ), a ∈ S ∧ m < a := by
-        unfold upperBounds at h; dsimp at h
-        push Not at h
-        exact h
-      ⟨Classical.choose h', u,
-      (Classical.choose_spec h').1, hu⟩
-
-
-abbrev seqL (n : ℕ) : ℝ := (seq hS hbdd n).l
-abbrev seqU (n : ℕ) : ℝ := (seq hS hbdd n).u
-
-def intervalOf : @SeqEntry S → Set ℝ
-| SeqEntry.mk l u _ _ => Set.Icc l u
-
-theorem elem_lt_ub : Classical.choose hS ≤ Classical.choose hbdd := by
-  sorry
-
-theorem incr {a : ℕ} : seqL hS hbdd a ≤ seqL hS hbdd (a+1) := by
-  induction a with
-  | zero =>
-    unfold seqL seq
-    dsimp
-    by_cases! h : (seq hS hbdd 0).l + (seq hS hbdd 0).u / 2 ∈ upperBounds S
-    · simp [h]; unfold seq; dsimp; rfl
-    · simp only [if_neg h, h]
-      unfold seq; dsimp
-      have hc := Classical.choose_spec hS
-      have hb := Classical.choose_spec hbdd
-      unfold upperBounds at hb
-      dsimp at hb
-      sorry
-  | succ p hp =>
-    sorry
-
-
-lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (u : upperBounds S) :
+lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (v : upperBounds S) :
     ∃ sup : upperBounds S, ∀ b : upperBounds S, sup ≤ b := by
-  sorry
-
+  by_cases hup : v.val ∈ S
+  · exact ⟨v, fun b => b.2 hup⟩
+  classical
+  let ⟨l₀ , hl₀⟩ := hS
+  let u₀ := v
+  let bdds : ℕ → ℝ × ℝ := Nat.rec (l₀, u₀) fun _ prev =>
+    let mid := (prev.1 + prev.2)/2
+    if hu : mid ∈ upperBounds S then (prev.1, mid)
+    else (pointAbove mid hu, prev.2)
+  let l : ℕ → ℝ := fun n => (bdds n).1
+  let u : ℕ → ℝ := fun n => (bdds n).2
+  have hlmem : ∀ n, l n ∈ S := by
+    intro n
+    induction n with
+    | zero => exact hl₀
+    | succ n ih =>
+      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
+      · simp only [l, Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
+        exact Set.mem_preimage.mp ih
+      have h1: (bdds (n + 1)).1 = pointAbove (((bdds n).1 + (bdds n).2)/2) h := by
+        simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
+      simp only[l,h1]
+      exact (pointAbove (((bdds n).1 + (bdds n).2)/2) h).2.1
+  have humem : ∀ n, u n ∈ upperBounds S := by
+    intro n
+    induction n with
+    | zero => simp only [Set.mem_setOf_eq, Nat.rec_zero, Subtype.coe_prop, u, bdds]
+    | succ n ih =>
+      simp only [u]
+      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
+      · simp only [Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
+      simp only [Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
+      exact ih
+  have hneq : u₀ - l₀ > 0 := by
+      simp only [gt_iff_lt, sub_pos]
+      refine Std.lt_iff_le_and_ne.mpr ⟨v.2 hl₀, ?_⟩
+      intro h
+      rw[← h] at hup
+      exact hup hl₀
+  have hdiff : ∀ n, u n - l n ≤ (u₀ - l₀) / 2 ^ n := by
+    intro n
+    induction n with
+    | zero => simp only [Set.mem_setOf_eq, Nat.rec_zero, pow_zero, div_one, Std.le_refl, u, bdds, l]
+    | succ n ih =>
+      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
+      · have bdds_eq : bdds (n + 1) = ((bdds n).1, ((bdds n).1 + (bdds n).2)/2) := by
+          simp [bdds, h, Set.mem_setOf_eq]
+        simp only [bdds_eq, tsub_le_iff_right, ge_iff_le, u, l]
+        refine (div_le_iff₀ ?_).mpr ?_
+        · positivity
+        calc (bdds n).1 + (bdds n).2 ≤ u n - l n + 2*(bdds n).1 := by simp [u, l]; group; linarith
+        _ ≤ (↑u₀ - l₀) / 2 ^ (n) + ((bdds n).1) * 2 := by linarith [ih]
+        _ = ((↑u₀ - l₀) / 2 ^ (n+1) + ((bdds n).1)) * 2 := by ring
+      have bdds_eq : bdds (n + 1) = ((pointAbove (((bdds n).1 + (bdds n).2)/2) h).val, (bdds n).2)
+        := by simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
+      simp only [bdds_eq, Set.mem_setOf_eq, tsub_le_iff_right, ge_iff_le, u, l]
+      calc (bdds n).2 = 1/2*(u n - l n + (((bdds n).1 + (bdds n).2))) := by simp [u, l]; ring
+      _ ≤ 1/2 *((↑u₀ - l₀) / 2 ^ (n) + ((bdds n).1 + (bdds n).2)) := by linarith [ih]
+      _ = (↑u₀ - l₀) / 2 ^ (n + 1) + (((bdds n).1 + (bdds n).2) / 2) := by ring
+      _ ≤ (↑u₀ - l₀) / 2 ^ (n + 1) + ↑(pointAbove (((bdds n).1 + (bdds n).2) / 2) h) :=
+        by linarith [((pointAbove (((bdds n).1 + (bdds n).2) / 2) h)).2.2]
+  have hdifflim : TendsTo ⟨u - l⟩ 0 := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := @exists_pow_lt_of_lt_one _ _ _ _ _ (ε/(u₀ - l₀)) (1/2 : ℝ) _ (by positivity)
+      (by linarith)
+    use N
+    intro n hn
+    calc dist (u n - l n) 0 = u n - l n := by
+          simp only [dist_zero_right, Real.norm_eq_abs, abs_eq_self, sub_nonneg]
+          exact humem n (hlmem n)
+    _ ≤ (u₀ - l₀) / 2 ^ n := by exact hdiff n
+    _ ≤ (u₀ - l₀) / 2 ^ N := by
+      apply (div_le_div_iff_of_pos_left hneq (by positivity) (by positivity)).mpr
+      exact (pow_le_pow_iff_right₀ (one_lt_two)).mpr hn
+    _ < ε := by
+      rw[lt_div_iff₀, mul_comm] at hN
+      · ring_nf at hN
+        simp only [one_div, inv_pow] at hN
+        ring_nf
+        simp only [inv_pow, hN]
+      exact hneq
+  have hCauchy : IsCauchyReal ⟨l⟩ := by
+    have hmon : Monotone l := by
+      refine monotone_nat_of_le_succ ?_
+      intro n
+      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
+      · simp only [l, Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
+        exact le_of_eq rfl
+      have bdds_eq : bdds (n + 1) = ((pointAbove (((bdds n).1 + (bdds n).2)/2) h).val, (bdds n).2)
+        := by simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
+      simp only [l, bdds_eq, Set.mem_setOf_eq, ge_iff_le]
+      calc (bdds n).1 ≤ (((bdds n).1 + (bdds n).1) / 2) := by simp
+      _ = (((bdds n).1 + (l n)) / 2) := by rfl
+      _ ≤ (((bdds n).1 + (u n)) / 2) := by
+        exact div_le_div_of_nonneg_right (by linarith [(humem n (hlmem n))]) (by positivity)
+      _ ≤ ↑(pointAbove (((bdds n).1 + (bdds n).2) / 2) h) := by
+        linarith [((pointAbove (((bdds n).1 + (bdds n).2) / 2) h)).2.2]
+    intro ε hε
+    obtain ⟨N, hN⟩ := hdifflim ε hε
+    use N
+    intro m hm n hn
+    calc
+      dist (l m) (l n) = |l n - l m| := by exact Metric.mem_sphere'.mp rfl
+      _ ≤ u N - l N := by
+        exact abs_sub_le_of_le_of_le (hmon hn) (humem N (hlmem n)) (hmon hm) (humem N (hlmem m))
+      _ = |(u N - l N) - 0| := by
+        simp only [sub_zero]
+        exact Eq.symm (abs_of_nonneg (sub_nonneg_of_le (humem N (hlmem N))))
+      _ < ε := by exact hN N (le_refl N)
+  obtain ⟨a, ha⟩ := MySequences.real_numbers_complete hCauchy
+  use ⟨a, ?_⟩
+  · intro b
+    apply tends_to_le_of_le ha
+    exact fun n => b.2 (hlmem n)
+  have ha' : TendsTo ⟨u⟩ a := by
+    have hadd : u = (u - l) + l := by
+      simp only [sub_add_cancel]
+    rw[hadd]
+    simpa only [sub_add_cancel, Pi.sub_apply, zero_add] using tends_to_add hdifflim ha
+  intro s hs
+  apply tends_to_ge_of_ge ha'
+  exact fun n => (humem n) hs
 
 /-
 Bonus! think about how to prove that every real number has a decimal expansion.
