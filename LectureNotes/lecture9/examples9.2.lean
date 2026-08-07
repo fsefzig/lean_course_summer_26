@@ -103,7 +103,8 @@ lemma mvtPartition_isSubordinate {f : ℝ → ℝ} (hf : Differentiable f)
   letI : NeZero N := ⟨Nat.ne_of_gt hN⟩
   intro J hJ x hx
   rw [Metric.mem_closedBall]
-  apply (Metric.dist_le_diam_of_mem (Box.isBounded_Icc _) hx (mvtPartition_isHenstock hf N hN J hJ)).trans
+  apply (Metric.dist_le_diam_of_mem (Box.isBounded_Icc _) hx
+    (mvtPartition_isHenstock hf N hN J hJ)).trans
   obtain ⟨ν, hν, rfl⟩ := BoxIntegral.unitPartition.mem_prepartition_boxes_iff.mp hJ
   exact (BoxIntegral.unitPartition.diam_boxIcc N ν).trans hδ
 
