@@ -1,7 +1,7 @@
 import LectureNotes.lecture8.examples8
 
 open MyFunctions MySequences Function
-
+set_option linter.style.longLine false
 /-
 Exercise 1: Finish the proof of the Leibniz rule, i.e., `deriv_mul`.
 Hint: Calc and limit laws and `continuous_at_iff_tends_to`.
@@ -11,26 +11,45 @@ Hint: Calc and limit laws and `continuous_at_iff_tends_to`.
 Use exercise1 to show compute the derivative of monomial functions.
 Hint: Induction on n.
 -/
-lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = fun x : ℝ => n * x ^ (n - 1) := by
+lemma HasDeriv_x : HasDeriv (fun x ↦ x) (fun _ ↦ 1) := by
+  intro x ε hε
+  use 1
+  constructor
+  · exact Real.zero_lt_one
+  intro y hy useless
+  simp only
+  rw[div_self]
+  · simp only [sub_self, abs_zero]
+    exact hε
+  exact sub_ne_zero_of_ne hy
+
+lemma HasDeriv_power (n : ℕ) : HasDeriv (fun x => x ^ n) (fun x : ℝ => n * x ^ (n - 1)) := by
   induction n with
   | zero =>
-    refine Eq.symm (deriv_of_has_deriv ?_)
     simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one,const_def]
     exact deriv_const 1
   | succ n hn =>
-    by_cases! h : n = 1
-    · sorry
+    by_cases! hn1 : n = 0
+    · simp only [hn1, zero_add, pow_one, Nat.cast_one, tsub_self, pow_zero, mul_one]
+      exact deriv_x
     simp only [pow_add, pow_one, Nat.cast_add, Nat.cast_one, add_tsub_cancel_right,add_mul,one_mul]
     have h : HasDeriv ((fun x ↦ x^n) * (fun x ↦ x)) (deriv (fun x ↦ x^n) * (fun x ↦ x) + (fun x ↦ x^n) * deriv  (fun x ↦ x)) := by
       refine deriv_mul ?_ ?_
-      · use fun x ↦ n * x^(n-1)
-        have hn1 : ∀ x, ∃ f', HasDerivAt (fun x ↦ x ^ n) f' x := by
-          intro x
-          by_contra
-          have hn2 : deriv (fun x ↦ x^n) = fun x ↦ 0 := by
-            unfold deriv
-            
-
+      · use fun x ↦ ↑n * x ^ (n - 1)
+      use fun x ↦ 1
+      exact deriv_x
+    have h1 : deriv (fun x ↦ x ^ n) = fun (x : ℝ) ↦ (↑n * x ^ (n - 1)) := by
+      exact Eq.symm (deriv_of_has_deriv hn)
+    have h2 : deriv (fun x ↦ x) = fun x ↦ 1 := by
+      exact Eq.symm (deriv_of_has_deriv deriv_x)
+    have h3 {x : ℝ} : ↑n * x ^ (n - 1) * x + x ^ n = ↑n * x ^ n + x ^ n := by
+      nth_rw 2[←pow_one x]
+      rw[mul_assoc,←pow_add x (n-1) 1, Nat.sub_add_cancel]
+      exact Nat.one_le_iff_ne_zero.mpr hn1
+    simp only [Pi.mul_def, h1, h2, mul_one, Pi.add_def,h3] at h
+    exact h
+lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = (fun x : ℝ => n * x ^ (n - 1)) := by
+  exact Eq.symm (deriv_of_has_deriv (HasDeriv_power n))
 
 
 /-
