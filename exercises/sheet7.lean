@@ -38,15 +38,11 @@ lemma HasDeriv_power (n : ℕ) : HasDeriv (fun x => x ^ n) (fun x : ℝ => n * x
       · use fun x ↦ ↑n * x ^ (n - 1)
       use fun x ↦ 1
       exact HasDeriv_x
-    have h1 : deriv (fun x ↦ x ^ n) = fun (x : ℝ) ↦ (↑n * x ^ (n - 1)) := by
-      exact Eq.symm (deriv_of_has_deriv hn)
-    have h2 : deriv (fun x ↦ x) = fun x ↦ 1 := by
-      exact Eq.symm (deriv_of_has_deriv HasDeriv_x)
-    have h3 {x : ℝ} : ↑n * x ^ (n - 1) * x + x ^ n = ↑n * x ^ n + x ^ n := by
+    have h1 {x : ℝ} : ↑n * x ^ (n - 1) * x + x ^ n = ↑n * x ^ n + x ^ n := by
       nth_rw 2[←pow_one x]
       rw[mul_assoc,←pow_add x (n-1) 1, Nat.sub_add_cancel]
       exact Nat.one_le_iff_ne_zero.mpr hn1
-    simp only [Pi.mul_def, h1, h2, mul_one, Pi.add_def,h3] at h
+    simp only [Pi.mul_def, Eq.symm (deriv_of_has_deriv hn), Eq.symm (deriv_of_has_deriv HasDeriv_x), mul_one, Pi.add_def,h1] at h
     exact h
 lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = (fun x : ℝ => n * x ^ (n - 1)) := by
   exact Eq.symm (deriv_of_has_deriv (HasDeriv_power n))
