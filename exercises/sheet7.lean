@@ -14,15 +14,22 @@ Hint: Induction on n.
 lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = fun x : ℝ => n * x ^ (n - 1) := by
   induction n with
   | zero =>
-    have h : HasDeriv (fun x ↦ x^0) (const _ 0) := by
-      have h1 : (fun x ↦ x^0) = const ℝ 1 := by
-        exact const_def
-      rw[h1]
-      exact deriv_const 1
     refine Eq.symm (deriv_of_has_deriv ?_)
-    simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one]
+    simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one,const_def]
+    exact deriv_const 1
   | succ n hn =>
-    sorry
+    by_cases! h : n = 1
+    · sorry
+    simp only [pow_add, pow_one, Nat.cast_add, Nat.cast_one, add_tsub_cancel_right,add_mul,one_mul]
+    have h : HasDeriv ((fun x ↦ x^n) * (fun x ↦ x)) (deriv (fun x ↦ x^n) * (fun x ↦ x) + (fun x ↦ x^n) * deriv  (fun x ↦ x)) := by
+      refine deriv_mul ?_ ?_
+      · use fun x ↦ n * x^(n-1)
+        have hn1 : ∀ x, ∃ f', HasDerivAt (fun x ↦ x ^ n) f' x := by
+          intro x
+          by_contra
+          have hn2 : deriv (fun x ↦ x^n) = fun x ↦ 0 := by
+            unfold deriv
+            
 
 
 
