@@ -139,7 +139,20 @@ lemma deriv_add {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable
 
 lemma deriv_mul {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
     HasDeriv (f * g) (deriv f * g  + f  * deriv g ) := by
-  sorry
+  apply has_deriv_of_differentiable at hf
+  apply has_deriv_of_differentiable at hg
+  intro x ε hε
+  specialize hf x ε hε
+  specialize hg x ε hε
+  rcases hf with ⟨δ1,hδ1⟩
+  rcases hg with ⟨δ2,hδ2⟩
+  use min δ1 δ2
+  constructor
+  · exact lt_min hδ1.1 hδ2.1
+  intro y hy1 hy2
+  simp only [Pi.mul_apply, Pi.add_apply]
+  
+
 
 lemma deriv_const (c : ℝ) : HasDeriv (const _ c) (const _ 0) := by
     intro x ε hε
