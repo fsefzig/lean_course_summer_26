@@ -12,7 +12,14 @@ Use exercise1 to show compute the derivative of monomial functions.
 Hint: Induction on n.
 -/
 lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = fun x : ℝ => n * x ^ (n - 1) := by
-  sorry
+  induction n with
+  | zero =>
+    refine Eq.symm (deriv_of_has_deriv ?_)
+    simp only [pow_zero, CharP.cast_eq_zero, zero_tsub, mul_one]
+    apply deriv_const
+  | succ =>
+    rename_i d hd
+    sorry
 
 /-
 Prove the fact that the derivate vanishes at a local minimum.
