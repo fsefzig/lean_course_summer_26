@@ -11,10 +11,19 @@ Proving the theorems on paper is already a good exercise, I encourage you to sen
 The formalization will require you to use essentially all the tools we have developed so far!
 -/
 
-noncomputable def ϕ :ℕ →  ℕ := fun n => Nat.card {k : Fin n | IsCoprime (k : ℕ) n}
+noncomputable def ϕ : ℕ → ℕ := fun n =>
+  if n = 1 then 1 else Nat.card {k : Fin n | Nat.Coprime (k : ℕ) n}
+
+/-
+Alternatively, ϕ n, is often defined using Fin (n + 1).
+In which case you need to specify the value at 0.
+We are using Fin n, as this is the set that appeared in our proof of the CRT.
+Note that for n ≠ 0,1 it doesnt make a difference as then gcd(n,n) = n > 1.
+-/
+
 
 --For future reference, we call the set of integers smaller than n and coprime to n, U(n).
-abbrev U (n : ℕ) := {k : Fin n | IsCoprime (k : ℕ) n}
+abbrev U (n : ℕ) := {k : Fin n | Nat.Coprime (k : ℕ) n}
 
 /-
 The first relation expresses the totient function as a product over the prime factors of `n`.
@@ -30,15 +39,18 @@ The second relation expresses a number `n` as a sum of the totient values of all
 theorem sum_formula (n : ℕ) : n = ∑ d ∈ (Nat.divisors n), ϕ d := by
   sorry
 
+variable (n : ℕ)
+
+#check n^(0-1)
 
 /-
 The proof of both relations involves the following properties of the totient function.
 -/
-lemma ϕ_prime_power {p : ℕ} (hp : Nat.Prime p) (k : ℕ) : ϕ (p ^ k) = p ^ k - p ^ (k - 1) := by
+lemma ϕ_prime_power {p k : ℕ} (hp : Nat.Prime p) (hk : k > 0) : ϕ (p ^ k) = p ^ k - p ^ (k - 1) := by
   sorry
 
 
-lemma ϕ_multiplicative {m n : ℕ} (h : IsCoprime m n) : ϕ (m * n) = ϕ m * ϕ n := by
+lemma ϕ_multiplicative {m n : ℕ} (h : Nat.Coprime m n) : ϕ (m * n) = ϕ m * ϕ n := by
   sorry
 
 /-
