@@ -56,14 +56,20 @@ lemma deriv_const_mul {f : ℝ → ℝ} (a : ℝ) : deriv (f * const _ a) = cons
     simp only [deriv_mul' hf (deriv_const a x), ← deriv_of_has_deriv (deriv_const a), const_zero, mul_comm, mul_zero, Pi.add_apply, Pi.mul_apply, const_apply, Pi.zero_apply, add_zero]
   simp only [deriv, Pi.mul_apply, const_apply, hf, ↓reduceDIte, mul_zero]
   by_cases! h : a = 0
-  · have h1 : ∃ g, HasDerivAt (f * const _ a) g x := by
-      use 0
-      simp only [h, const_zero, mul_zero]
-      rw[←const_zero]
-      exact deriv_const 0 x
-    simp only [h1,↓reduceDIte]
-
-
+  · rw[←deriv,h,const_zero,mul_zero]
+    exact Eq.symm (congrFun (deriv_of_has_deriv (deriv_const 0)) x)
+  have h1 : ¬∃ f', HasDerivAt (f * const _ a) f' x := by
+    by_contra!
+    obtain ⟨f',hf'⟩ := this
+    have hf' : MyFunctions.TendsTo (fun y ↦ a * ((f y - f x) / (y - x))) x f' := by
+      simp only [HasDerivAt, Pi.mul_apply, const_apply] at hf'
+      grind
+    have ha :  MyFunctions.TendsTo (fun _ ↦ a⁻¹) x a⁻¹ := tends_to_const a⁻¹ x
+    have contra := tends_to_mul_tends_to (fun y ↦ a * ((f y - f x) / (y - x))) ((fun _ ↦ a⁻¹)) x f' a⁻¹ hf' ha
+    have h : (fun y ↦ a * ((f y - f x) / (y - x)) * a⁻¹) = fun y ↦ (f y - f x) / (y - x) := by grind
+    rw[h,←HasDerivAt] at contra
+    grind
+  grind
 
 lemma deriv_neg {f : ℝ → ℝ} : deriv (-f) = - deriv f := by
   have h : (-f) = (f * const _ (-1)) := by
@@ -84,6 +90,8 @@ theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
       exact hf
     have h : deriv (-f) x = 0 := by
       exact deriv_at_max_zero hε hf
+    simp only [deriv_neg, Pi.neg_apply, neg_eq_zero] at h
+    exact h
 
 
 /-
@@ -100,8 +108,23 @@ theorem min_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Cont
 
 lemma satz_von_rolle {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Differentiable f) (h : f a = f b) :
     ∃ x ∈ Set.Ioo a b, deriv f x = 0 := by
-  sorry
-
+    by_cases! h : IsMinOn f (Set.Icc a b) a ∧ ∃ x ∈ Set.Icc a b, IsMaxOn f (Set.Icc a b) a
+    · have h1 : ∀x ∈ Set.Ioo a b, f x = f a := by
+        intro x hx
+        by_contra!
+        apply lt_or_gt_of_ne at this
+        rcases this with h1 | h2
+        · have h2 := h.1
+          simp [IsMinOn,IsMinFilter] at h2
+          grind
+        have h1 := h.2
+        simp [IsMaxOn,IsMaxFilter] at h1
+        grind
+      use (a+b)/2
+      constructor
+      · grind
+      have h := Eq.symm (congrFun (deriv_of_has_deriv (deriv_const (f a))) ((a+b)/2))
+      simp only [const_apply] at h
 /-
 Finally, use the lemma above to prove the main theorem.
 -/
