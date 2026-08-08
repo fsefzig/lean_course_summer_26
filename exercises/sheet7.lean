@@ -69,17 +69,34 @@ Finally, use the lemma above to prove the main theorem.
 -/
 theorem mean_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Differentiable f)
     : ∃ x ∈ Set.Ioo a b, deriv f x = (f b - f a) / (b - a) := by
-    have h : HasDeriv (fun x ↦ (f x + (f a - f b) / (b - a) * x)) ((deriv f) + deriv (fun x ↦ (f a - f b) / (b - a)*x)) := by
-      refine @deriv_add f (fun x ↦ (f a - f b) / (b - a) * x) hf ?_
+    have h : HasDeriv (fun x ↦ (f x + ((f a - f b) / (b - a) * x + (f b - f a) / (b - a)*a))) ((deriv f) + deriv (fun x ↦ (f a - f b) / (b - a)*x+(f b - f a) / (b - a)*a)) := by
+      refine @deriv_add f (fun x ↦ ((f a - f b) / (b - a) * x + (f b - f a) / (b - a)*a)) hf ?_
       use fun _ ↦ (f a - f b)/(b-a)
-      have h : (fun x ↦ (f a - f b) / (b - a) * x) = fun x ↦ (f a - f b) / (b - a) * x + 0 := by simp only [add_zero]
-      rw[const_def,h]
-      exact deriv_affine ((f a - f b)/(b-a)) 0
-    have h1 : (fun x ↦ (f x + (f a - f b) / (b - a) * x + (f b - f a) / (b - a)*a)) b = f a := by
-      simp only
-      ring
-
-
+      exact deriv_affine ((f a - f b)/(b-a)) ((f b - f a)/(b-a)*a)
+    have h1 : f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a)*a) = f a := by
+      calc
+        f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a) * a) = f b + (f a - f b) * ((b-a) / (b-a)) := by ring
+        _ = f b + (f a - f b) := by
+          rw[div_self]
+          · ring
+          linarith
+        _ = f a := by ring
+    have h2 : deriv (fun x ↦ (f a - f b) / (b - a)*x+(f b - f a) / (b - a)*a) = const _ ((f a - f b) / (b - a)) := by
+      refine Eq.symm (deriv_of_has_deriv ?_)
+      exact deriv_affine ((f a - f b) / (b - a)) ((f b - f a) / (b - a)*a)
+    simp only [h2] at h
+    have h2 : f a + ((f a - f b) / (b - a) * a + (f b - f a) / (b - a)*a) = f a := by ring
+    have h3 : f a + ((f a - f b) / (b - a) * a + (f b - f a) / (b - a)*a) = f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a)*a) := by simp only [h1,h2]
+    have hf : Differentiable fun x ↦ f x + ((f a - f b) / (b - a) * x + (f b - f a) / (b - a) * a) := by use deriv f + const ℝ ((f a - f b) / (b - a))
+    have h_rolle : ∃x ∈ Set.Ioo a b, deriv (fun x ↦ f x + ((f a - f b) / (b - a) * x + (f b - f a) / (b - a) * a)) x = 0 := satz_von_rolle hab hf h3
+    obtain ⟨x,hx⟩ := h_rolle
+    apply deriv_of_has_deriv at h
+    use x
+    constructor
+    · exact hx.1
+    rw[←h] at hx
+    simp only [Pi.add_apply, const_apply] at hx
+    grind
 
 /-
 Bonus exercise:
