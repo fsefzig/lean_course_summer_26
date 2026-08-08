@@ -139,19 +139,29 @@ lemma deriv_add {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable
 
 lemma deriv_mul {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
     HasDeriv (f * g) (deriv f * g  + f  * deriv g ) := by
-  apply has_deriv_of_differentiable at hf
+  have hf1 := has_deriv_of_differentiable hf
   apply has_deriv_of_differentiable at hg
-  intro x ε hε
-  specialize hf x ε hε
-  specialize hg x ε hε
-  rcases hf with ⟨δ1,hδ1⟩
-  rcases hg with ⟨δ2,hδ2⟩
-  use min δ1 δ2
-  constructor
-  · exact lt_min hδ1.1 hδ2.1
-  intro y hy1 hy2
-  simp only [Pi.mul_apply, Pi.add_apply]
-  
+  intro x
+  simp only [HasDerivAt,Pi.mul_apply, Pi.add_apply]
+  have h : (fun y ↦ (f y * g y - f x * g x) / (y - x)) = fun y ↦ (f y - f x) / (y - x) * g x + f y * ((g y - g x) / (y - x)) := by
+    ext y
+    ring
+  rw[h]
+  apply tends_to_add_tends_to
+  · apply tends_to_mul_tends_to
+    · apply hf1
+    intro ε hε
+    use 1
+    constructor
+    · exact Real.zero_lt_one
+    intro y hy hy1
+    simp only [sub_self, abs_zero]
+    exact hε
+  apply tends_to_mul_tends_to
+  · apply continuous_of_differentiable at hf
+    exact continuous_at_iff_tends_to.mp (hf x)
+  apply hg
+
 
 
 lemma deriv_const (c : ℝ) : HasDeriv (const _ c) (const _ 0) := by
