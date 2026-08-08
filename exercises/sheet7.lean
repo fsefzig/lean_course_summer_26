@@ -12,16 +12,9 @@ Use exercise1 to show compute the derivative of monomial functions.
 Hint: Induction on n.
 -/
 lemma HasDeriv_x : HasDeriv (fun x ↦ x) (fun _ ↦ 1) := by
-  intro x ε hε
-  use 1
-  constructor
-  · exact Real.zero_lt_one
-  intro y hy useless
-  simp only
-  rw[div_self]
-  · simp only [sub_self, abs_zero]
-    exact hε
-  exact sub_ne_zero_of_ne hy
+  have h : (fun (x : ℝ) ↦ x) = fun x ↦ 1*x + 0 := by simp only [one_mul,add_zero]
+  rw[const_def,h]
+  exact deriv_affine 1 0
 
 lemma HasDeriv_power (n : ℕ) : HasDeriv (fun x => x ^ n) (fun x : ℝ => n * x ^ (n - 1)) := by
   induction n with
@@ -75,8 +68,18 @@ lemma satz_von_rolle {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Different
 Finally, use the lemma above to prove the main theorem.
 -/
 theorem mean_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Differentiable f)
-    : ∃ x ∈ Set.Ioo a b, deriv f x = f b - f a / (b - a) := by
-  sorry
+    : ∃ x ∈ Set.Ioo a b, deriv f x = (f b - f a) / (b - a) := by
+    have h : HasDeriv (fun x ↦ (f x + (f a - f b) / (b - a) * x)) ((deriv f) + deriv (fun x ↦ (f a - f b) / (b - a)*x)) := by
+      refine @deriv_add f (fun x ↦ (f a - f b) / (b - a) * x) hf ?_
+      use fun _ ↦ (f a - f b)/(b-a)
+      have h : (fun x ↦ (f a - f b) / (b - a) * x) = fun x ↦ (f a - f b) / (b - a) * x + 0 := by simp only [add_zero]
+      rw[const_def,h]
+      exact deriv_affine ((f a - f b)/(b-a)) 0
+    have h1 : (fun x ↦ (f x + (f a - f b) / (b - a) * x + (f b - f a) / (b - a)*a)) b = f a := by
+      simp only
+      ring
+
+
 
 /-
 Bonus exercise:

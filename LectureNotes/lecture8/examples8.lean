@@ -5,7 +5,7 @@ import Exercises.Sheet6
 namespace MyFunctions
 
 open MyFunctions MySequences Function
-
+set_option linter.style.longLine false
 /-
 Convergence of a function `f : ℝ → ℝ` to a limit `a` at a point `x`.
 -/
@@ -149,18 +149,13 @@ lemma deriv_mul {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable
   rw[h]
   apply tends_to_add_tends_to
   · apply tends_to_mul_tends_to
-    · apply hf1
-    intro ε hε
-    use 1
-    constructor
-    · exact Real.zero_lt_one
-    intro y hy hy1
-    simp only [sub_self, abs_zero]
-    exact hε
+    · exact hf1 x
+    simp only [const_def]
+    exact tends_to_const (g x) x
   apply tends_to_mul_tends_to
   · apply continuous_of_differentiable at hf
     exact continuous_at_iff_tends_to.mp (hf x)
-  apply hg
+  exact hg x
 
 
 
