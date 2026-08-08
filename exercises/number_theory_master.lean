@@ -11,15 +11,7 @@ Proving the theorems on paper is already a good exercise, I encourage you to sen
 The formalization will require you to use essentially all the tools we have developed so far!
 -/
 
-noncomputable def ϕ : ℕ → ℕ := fun n =>
-  if n = 1 then 1 else Nat.card {k : Fin n | Nat.Coprime (k : ℕ) n}
-
-/-
-Alternatively, ϕ n, is often defined using Fin (n + 1).
-In which case you need to specify the value at 0.
-We are using Fin n, as this is the set that appeared in our proof of the CRT.
-Note that for n ≠ 0,1 it doesnt make a difference as then gcd(n,n) = n > 1.
--/
+noncomputable def ϕ : ℕ → ℕ := fun n => Nat.card {k : Fin n | Nat.Coprime (k : ℕ) n}
 
 
 --For future reference, we call the set of integers smaller than n and coprime to n, U(n).
