@@ -54,18 +54,14 @@ lemma deriv_const_mul {f : ℝ → ℝ} (a : ℝ) : deriv (f * const _ a) = cons
   by_cases hf : ∃f', HasDerivAt f f' x
   · obtain ⟨f',hf⟩ := hf
     simp only [deriv_mul' hf (deriv_const a x), ← deriv_of_has_deriv (deriv_const a), const_zero, mul_comm, mul_zero, Pi.add_apply, Pi.mul_apply, const_apply, Pi.zero_apply, add_zero]
-  simp only [deriv, Pi.mul_apply, const_apply, hf, ↓reduceDIte, mul_zero, dite_eq_right_iff, forall_exists_index]
+  simp only [deriv, Pi.mul_apply, const_apply, hf, ↓reduceDIte, mul_zero]
   by_cases! h : a = 0
-  · intro x1 hx1
-    have hx2 := hx1
-    simp only [h, const_zero, mul_zero] at hx2
-    rw[←const_zero] at hx2
-    have h : x1 = 0 := by
-      by_contra!
-      have h : x1 = 0 := deriv_unique hx2 (deriv_const 0 x)
-      contradiction
-    rw[h] at hx1
-    
+  · have h1 : ∃ g, HasDerivAt (f * const _ a) g x := by
+      use 0
+      simp only [h, const_zero, mul_zero]
+      rw[←const_zero]
+      exact deriv_const 0 x
+    simp only [h1,↓reduceDIte]
 
 
 
