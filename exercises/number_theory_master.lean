@@ -31,10 +31,6 @@ The second relation expresses a number `n` as a sum of the totient values of all
 theorem sum_formula (n : ℕ) : n = ∑ d ∈ (Nat.divisors n), ϕ d := by
   sorry
 
-variable (n : ℕ)
-
-#check n^(0-1)
-
 /-
 The proof of both relations involves the following properties of the totient function.
 -/
