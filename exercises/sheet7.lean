@@ -45,8 +45,36 @@ lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = (fun x : ℝ => n * x ^ (
 Prove the fact that the derivate vanishes at a local minimum.
 Hint: Use the corresponding fact for a local maximum and the fact that `deriv (-f) = -deriv f`.
 -/
+lemma deriv_mul' {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
+    deriv (f * g) = (deriv f * g  + f  * deriv g) := by
+  exact Eq.symm (deriv_of_has_deriv (deriv_mul hf hg))
+
+lemma deriv_const_mul {f : ℝ → ℝ} (hf : Differentiable f) (a : ℝ) : deriv (f * const _ a) = const _ a * deriv f := by
+  have h : Differentiable (const _ a) := by
+    use const _ 0
+    exact deriv_const a
+  simp only [deriv_mul' hf h, ← deriv_of_has_deriv (deriv_const a), const_zero, mul_zero, add_zero,mul_comm]
+
+lemma deriv_neg {f : ℝ → ℝ} (hf : Differentiable f) : deriv (-f) = - deriv f := by
+  have h : (-f) = (f * const _ (-1)) := by
+    ext x
+    simp only [Pi.neg_apply, Pi.mul_apply, const_apply, mul_neg, mul_one]
+  rw[h,deriv_const_mul hf (-1)]
+  ext x
+  simp only [Pi.mul_apply, const_apply, neg_mul, one_mul, Pi.neg_apply]
+
 theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
-    (hf : IsMinOn f (Set.Ioo (x - ε) (x + ε)) x) : deriv f x = 0 := by sorry
+    (hf : IsMinOn f (Set.Ioo (x - ε) (x + ε)) x) : deriv f x = 0 := by
+    have hf : IsMaxOn (-f) (Set.Ioo (x - ε) (x + ε)) x := by
+      intro x1 hx
+      simp only [Pi.neg_apply, neg_le_neg_iff, Set.mem_setOf_eq]
+      simp only [IsMinOn, IsMinFilter, Filter.eventually_principal, Set.mem_Ioo, and_imp] at hf
+      simp only [Set.mem_Ioo] at hx
+      specialize hf x1 hx.1 hx.2
+      exact hf
+    have h : deriv (-f) x = 0 := by
+      exact deriv_at_max_zero hε hf
+    
 
 /-
 Use the theorem `deriv_at_max_zero` and the theorems below
@@ -73,14 +101,7 @@ theorem mean_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Dif
       refine @deriv_add f (fun x ↦ ((f a - f b) / (b - a) * x + (f b - f a) / (b - a)*a)) hf ?_
       use fun _ ↦ (f a - f b)/(b-a)
       exact deriv_affine ((f a - f b)/(b-a)) ((f b - f a)/(b-a)*a)
-    have h1 : f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a)*a) = f a := by
-      calc
-        f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a) * a) = f b + (f a - f b) * ((b-a) / (b-a)) := by ring
-        _ = f b + (f a - f b) := by
-          rw[div_self]
-          · ring
-          linarith
-        _ = f a := by ring
+    have h1 : f b + ((f a - f b) / (b - a) * b + (f b - f a) / (b - a)*a) = f a := by grind
     have h2 : deriv (fun x ↦ (f a - f b) / (b - a)*x+(f b - f a) / (b - a)*a) = const _ ((f a - f b) / (b - a)) := by
       refine Eq.symm (deriv_of_has_deriv ?_)
       exact deriv_affine ((f a - f b) / (b - a)) ((f b - f a) / (b - a)*a)
