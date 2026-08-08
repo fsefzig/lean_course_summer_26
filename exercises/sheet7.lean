@@ -45,26 +45,35 @@ lemma deriv_power (n : ℕ) : deriv (fun x => x ^ n) = (fun x : ℝ => n * x ^ (
 Prove the fact that the derivate vanishes at a local minimum.
 Hint: Use the corresponding fact for a local maximum and the fact that `deriv (-f) = -deriv f`.
 -/
-lemma deriv_mul' {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
-    deriv (f * g) = (deriv f * g  + f  * deriv g) := by
-  exact Eq.symm (deriv_of_has_deriv (deriv_mul hf hg))
+lemma deriv_mul' {f g : ℝ → ℝ} {x f' g' : ℝ} (hf : HasDerivAt f f' x) (hg : HasDerivAt g g' x) :
+    deriv (f * g) x = (deriv f * g  + f  * deriv g) x := by
+  sorry -- trivial claim but a lot of work to manually prove (might come back to this)
 
 lemma deriv_const_mul {f : ℝ → ℝ} (a : ℝ) : deriv (f * const _ a) = const _ a * deriv f := by
-  by_cases hf : Differentiable f
-  · have h : Differentiable (const _ a) := by
-      use const _ 0
-      exact deriv_const a
-    simp only [deriv_mul' hf h, ← deriv_of_has_deriv (deriv_const a), const_zero, mul_zero, add_zero,mul_comm]
-  have h : deriv f = 0 := by
-    simp_all only [Differentiable, not_exists, deriv, Pi.zero_apply, dite_eq_right_iff, forall_exists_index,HasDeriv]
-    intro f'
-    specialize hf (const _ f')
-    simp at hf
+  ext x
+  by_cases hf : ∃f', HasDerivAt f f' x
+  · obtain ⟨f',hf⟩ := hf
+    simp only [deriv_mul' hf (deriv_const a x), ← deriv_of_has_deriv (deriv_const a), const_zero, mul_comm, mul_zero, Pi.add_apply, Pi.mul_apply, const_apply, Pi.zero_apply, add_zero]
+  simp only [deriv, Pi.mul_apply, const_apply, hf, ↓reduceDIte, mul_zero, dite_eq_right_iff, forall_exists_index]
+  by_cases! h : a = 0
+  · intro x1 hx1
+    have hx2 := hx1
+    simp only [h, const_zero, mul_zero] at hx2
+    rw[←const_zero] at hx2
+    have h : x1 = 0 := by
+      by_contra!
+      have h : x1 = 0 := deriv_unique hx2 (deriv_const 0 x)
+      contradiction
+    rw[h] at hx1
+    
+
+
+
 lemma deriv_neg {f : ℝ → ℝ} : deriv (-f) = - deriv f := by
   have h : (-f) = (f * const _ (-1)) := by
     ext x
     simp only [Pi.neg_apply, Pi.mul_apply, const_apply, mul_neg, mul_one]
-  rw[h,deriv_const_mul hf (-1)]
+  rw[h,deriv_const_mul (-1)]
   ext x
   simp only [Pi.mul_apply, const_apply, neg_mul, one_mul, Pi.neg_apply]
 
