@@ -49,13 +49,18 @@ lemma deriv_mul' {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiabl
     deriv (f * g) = (deriv f * g  + f  * deriv g) := by
   exact Eq.symm (deriv_of_has_deriv (deriv_mul hf hg))
 
-lemma deriv_const_mul {f : ℝ → ℝ} (hf : Differentiable f) (a : ℝ) : deriv (f * const _ a) = const _ a * deriv f := by
-  have h : Differentiable (const _ a) := by
-    use const _ 0
-    exact deriv_const a
-  simp only [deriv_mul' hf h, ← deriv_of_has_deriv (deriv_const a), const_zero, mul_zero, add_zero,mul_comm]
-
-lemma deriv_neg {f : ℝ → ℝ} (hf : Differentiable f) : deriv (-f) = - deriv f := by
+lemma deriv_const_mul {f : ℝ → ℝ} (a : ℝ) : deriv (f * const _ a) = const _ a * deriv f := by
+  by_cases hf : Differentiable f
+  · have h : Differentiable (const _ a) := by
+      use const _ 0
+      exact deriv_const a
+    simp only [deriv_mul' hf h, ← deriv_of_has_deriv (deriv_const a), const_zero, mul_zero, add_zero,mul_comm]
+  have h : deriv f = 0 := by
+    simp_all only [Differentiable, not_exists, deriv, Pi.zero_apply, dite_eq_right_iff, forall_exists_index,HasDeriv]
+    intro f'
+    specialize hf (const _ f')
+    simp at hf
+lemma deriv_neg {f : ℝ → ℝ} : deriv (-f) = - deriv f := by
   have h : (-f) = (f * const _ (-1)) := by
     ext x
     simp only [Pi.neg_apply, Pi.mul_apply, const_apply, mul_neg, mul_one]
@@ -74,7 +79,7 @@ theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
       exact hf
     have h : deriv (-f) x = 0 := by
       exact deriv_at_max_zero hε hf
-    
+
 
 /-
 Use the theorem `deriv_at_max_zero` and the theorems below
