@@ -93,6 +93,24 @@ theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
     simp only [deriv_neg, Pi.neg_apply, neg_eq_zero] at h
     exact h
 
+theorem deriv_at_max_zero' {f : ℝ → ℝ} {x a b : ℝ} (hab : a < b)
+    (hf : IsMaxOn f (Set.Ioo a b) x) : deriv f x = 0 := by
+    sorry
+
+theorem deriv_at_min_zero' {f : ℝ → ℝ} {x a b : ℝ} (hab : a < b)
+    (hf : IsMinOn f (Set.Ioo a b) x) : deriv f x = 0 := by
+    have hf : IsMaxOn (-f) (Set.Ioo a b) x := by
+      intro x1 hx
+      simp only [Pi.neg_apply, neg_le_neg_iff, Set.mem_setOf_eq]
+      simp only [IsMinOn, IsMinFilter, Filter.eventually_principal, Set.mem_Ioo, and_imp] at hf
+      simp only [Set.mem_Ioo] at hx
+      specialize hf x1 hx.1 hx.2
+      exact hf
+    have h : deriv (-f) x = 0 := by
+      exact deriv_at_max_zero' hab hf
+    simp only [deriv_neg, Pi.neg_apply, neg_eq_zero] at h
+    exact h
+
 
 /-
 Use the theorem `deriv_at_max_zero` and the theorems below
@@ -108,7 +126,7 @@ theorem min_value_theorem {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Cont
 
 lemma satz_von_rolle {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Differentiable f) (h : f a = f b) :
     ∃ x ∈ Set.Ioo a b, deriv f x = 0 := by
-    by_cases! h : IsMinOn f (Set.Icc a b) a ∧ ∃ x ∈ Set.Icc a b, IsMaxOn f (Set.Icc a b) a
+    by_cases h : IsMinOn f (Set.Icc a b) a ∧ IsMaxOn f (Set.Icc a b) a
     · have h1 : ∀x ∈ Set.Ioo a b, f x = f a := by
         intro x hx
         by_contra!
@@ -123,8 +141,55 @@ lemma satz_von_rolle {f : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hf : Different
       use (a+b)/2
       constructor
       · grind
-      have h := Eq.symm (congrFun (deriv_of_has_deriv (deriv_const (f a))) ((a+b)/2))
-      simp only [const_apply] at h
+      have h : HasDerivAt f 0 ((a + b) / 2) := by
+        simp only [HasDerivAt, MyFunctions.TendsTo, gt_iff_lt, ne_eq, sub_zero]
+        intro ε hε
+        use (b/2 - a/2)
+        grind
+      exact Eq.symm (deriv_eq_of_has_deriv f 0 ((a + b) / 2) h)
+    simp only [not_and_or] at h
+    rcases h with h1 | h2
+    · have h1 : ∃ x ∈ Set.Ioo a b, IsMinOn f (Set.Icc a b) x := by
+        obtain ⟨x,hx⟩ := min_value_theorem hab (continuous_of_differentiable hf)
+        use x
+        constructor
+        · have h2 : x ≠ a ∧ x ≠ b := by
+            by_contra!
+            have h2 : x ≠ a := by grind
+            apply this at h2
+            rw[IsMinOn,IsMinFilter,h,←IsMinFilter,←IsMinOn] at h1
+            grind
+          grind
+        exact hx.2
+      obtain ⟨x,hx⟩ := h1
+      use x
+      rw[deriv_at_min_zero' hab]
+      · grind
+      intro x1 hx1
+      have h := Set.mem_Icc_of_Ioo hx1
+      apply hx.2 at h
+      exact h
+    have h1 : ∃ x ∈ Set.Ioo a b, IsMaxOn f (Set.Icc a b) x := by
+      obtain ⟨x,hx⟩ := max_value_theorem hab (continuous_of_differentiable hf)
+      use x
+      constructor
+      · have h2 : x ≠ a ∧ x ≠ b := by
+          by_contra!
+          have h3 : x ≠ a := by grind
+          apply this at h3
+          rw[IsMaxOn,IsMaxFilter,h,←IsMaxFilter,←IsMaxOn] at h2
+          grind
+        grind
+      exact hx.2
+    obtain ⟨x,hx⟩ := h1
+    use x
+    rw[deriv_at_max_zero' hab]
+    · grind
+    intro x1 hx1
+    have h := Set.mem_Icc_of_Ioo hx1
+    apply hx.2 at h
+    exact h
+
 /-
 Finally, use the lemma above to prove the main theorem.
 -/
