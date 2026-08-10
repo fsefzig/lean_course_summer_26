@@ -215,9 +215,8 @@ lemma is_cauchy_toReal (x : RatSeq) : IsCauchy x → IsCauchyReal x := by
   sorry
 
 -- This is essentially the definition of the real numbers.
-theorem real_numbers_complete {x : RealSeq} (hx : IsCauchyReal x) :
-  TendsTo x  (CauSeq.lim  ⟨x, cauchy_real_iff.2 hx⟩) := by
-  exact CauSeq.equiv_lim ⟨_, cauchy_real_iff.2 hx⟩
+theorem real_numbers_complete {x : RealSeq} (hx : IsCauchyReal x) : ∃ a, TendsTo x a:= by
+  exact ⟨(CauSeq.lim  ⟨x, cauchy_real_iff.2 hx⟩), CauSeq.equiv_lim ⟨_, cauchy_real_iff.2 hx⟩⟩
 
 #check ℝ --ctrl + click to see the actual definition!
 
