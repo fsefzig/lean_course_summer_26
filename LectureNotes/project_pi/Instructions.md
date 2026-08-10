@@ -25,4 +25,4 @@ Implement this proof strategy. This mean introduce the main steps of the proof w
 Work out as many details as you can. 
 
 ## Final step: Clean-up
-Once you're satisfied with your proof (and hopefully the proof assistant is too), your proof will most likely be a bit messy at this stage, multiple lemmas and many have's flying around. So try to organize the proof for the reader. You can skip some of the details and proceed with the final step if you run out of time or motivation. 
+Once you're satisfied with your proof (and hopefully the proof assistant is too), your proof will most likely be a bit messy at this stage, multiple lemmas and many have's flying around. So should try to organize the proof for the reader. You can skip some of the details in Step5 and proceed with the final step if you run out of time or motivation. 
