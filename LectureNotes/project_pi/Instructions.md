@@ -3,10 +3,8 @@
 The goal of the final project of the course is to prove the irrationality of PI.
 Ideally, you will work in groups of 2-3 people on this project. This way you can split the work in step 5 below and of course discuss and workout the other steps together.
 
-
 ## Step 1: Read the proof and additional materials
 This mathoverflow post can be helpful: https://math.stackexchange.com/questions/2588293/a-simple-proof-that-pi-is-irrational-by-ivan-niven
-
 
 ## Step 2: Identify the Ingredients
 Analyse the proof and figure out which definitions and results are used.
