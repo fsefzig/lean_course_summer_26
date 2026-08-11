@@ -1,6 +1,6 @@
 import Mathlib.Analysis.BoxIntegral.Basic
 import Mathlib.Analysis.BoxIntegral.Partition.Tagged
-import Exercises.Sheet7
+import exercises.sheet7
 
 open BoxIntegral MyFunctions
 

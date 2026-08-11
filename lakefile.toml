@@ -27,7 +27,8 @@ name = "Exercises"
 srcDir = "."
 roots = [
   "exercises.sheet5",
-  "exercises.sheet6"
+  "exercises.sheet6",
+  "exercises.sheet7"
 ]
 
 [[lean_lib]]

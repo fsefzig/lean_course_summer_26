@@ -1,6 +1,6 @@
 import Mathlib.Analysis.BoxIntegral.UnitPartition
 import LectureNotes.lecture9.examples9
-import Exercises.Sheet7
+import exercises.sheet7
 
 open BoxIntegral MyFunctions
 

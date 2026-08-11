@@ -68,6 +68,17 @@ theorem deriv_at_min_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
       _ = 0 := by rw[deriv_at_max_zero hε (max_minus_of_min hf), neg_zero]
   simp only [deriv, h, ↓reduceDIte]
 
+theorem cantor {S : Type} (f : S → Set S) : ¬Surjective f := by
+  intro h
+  have ⟨x, p⟩ := h (fun x : S => x ∉ f x)
+  have : x ∈ f x ↔ x ∉ f x := by
+    constructor
+    · intro h
+      rwa [p] at h
+    · intro h
+      rwa [p]
+  grind
+
 /-
 Use the theorem `deriv_at_max_zero` and the theorems below
 to prove Rolle's theorem from the lecture.
