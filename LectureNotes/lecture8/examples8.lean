@@ -1,6 +1,7 @@
 import LectureNotes.lecture7.examples7
 import Exercises.Sheet5
 import Exercises.Sheet6
+import Mathlib.Analysis.Calculus.Deriv.Slope
 
 namespace MyFunctions
 
@@ -11,7 +12,6 @@ Convergence of a function `f : ℝ → ℝ` to a limit `a` at a point `x`.
 -/
 def TendsTo (f : ℝ → ℝ) (x : ℝ) (a : ℝ) : Prop :=
     ∀ ε > 0, ∃ δ > 0, ∀ y ≠ x, |y - x| < δ → |f y - a| < ε
-
 
 /-
 As you can see, there are a few sorry's in the code. Most of these results are similar to things
@@ -55,11 +55,11 @@ lemma tends_to_of_sub {f : ℝ → ℝ} {x a : ℝ} :
   simp only [Pi.sub_apply, const_apply, sub_zero] at h'
   exact h'
 
-lemma tends_to_add_tends_to (f g : ℝ → ℝ) (x a b : ℝ) :
+lemma tends_to_add_tends_to {f g : ℝ → ℝ} {x a b : ℝ} :
     TendsTo f x a → TendsTo g x b → TendsTo (fun y => f y + g y) x (a + b) := by
   sorry
 
-lemma tends_to_mul_tends_to (f g : ℝ → ℝ) (x a b : ℝ) :
+lemma tends_to_mul_tends_to {f g : ℝ → ℝ} {x a b : ℝ} :
     TendsTo f x a → TendsTo g x b → TendsTo (fun y => f y * g y) x (a * b) := by
   sorry
 
@@ -80,6 +80,12 @@ Assertion that `f'` is the derivative of `f` at every point `x : ℝ`
 def HasDeriv (f : ℝ → ℝ) (f' : ℝ → ℝ) : Prop :=
     ∀ x, HasDerivAt f (f' x) x
 
+lemma HasDerivAt_iff {f : ℝ → ℝ} {f' x : ℝ} :
+  HasDerivAt f f' x ↔ _root_.HasDerivAt f f' x := by
+  rw [hasDerivAt_iff_tendsto_slope, Metric.tendsto_nhdsWithin_nhds]
+  simp only [HasDerivAt, TendsTo, slope_def_field, Real.dist_eq,
+    Set.mem_compl_iff, Set.mem_singleton_iff]
+
 /-
 We define the derivate of a function to be the value `f'`
 from above if it exists, otherwise `0`.
@@ -92,7 +98,7 @@ noncomputable def deriv (f : ℝ → ℝ) (x : ℝ) : ℝ :=
   else 0
 
 -- If `f` is differentiable at `x`, then `deriv f x` is the derivative of `f` at `x`.
-lemma deriv_eq_of_has_deriv (f : ℝ → ℝ) (f' : ℝ) (x : ℝ) (hf : HasDerivAt f f' x) :
+lemma deriv_eq_of_has_deriv {f : ℝ → ℝ} {f' : ℝ} {x : ℝ} (hf : HasDerivAt f f' x) :
      f' = deriv f x := by
   unfold deriv
   have hex: ∃ f', HasDerivAt f f' x := ⟨f', hf⟩
@@ -103,7 +109,7 @@ lemma deriv_eq_of_has_deriv (f : ℝ → ℝ) (f' : ℝ) (x : ℝ) (hf : HasDeri
 lemma deriv_of_has_deriv {f : ℝ → ℝ} {f' : ℝ → ℝ} (hf : HasDeriv f f') :
     f' = deriv f := by
   ext x --extensionality of functions
-  apply deriv_eq_of_has_deriv f (f' x) x
+  apply deriv_eq_of_has_deriv
   exact hf x
 
 -- Thus, we introduce the notion of a differentiable function.
@@ -117,29 +123,54 @@ lemma has_deriv_of_differentiable {f : ℝ → ℝ} (hf : Differentiable f) :
     rw[← deriv_of_has_deriv hf']
     exact hf'
 
+lemma continuous_at_of_deriv_at {f : ℝ → ℝ} {f' x : ℝ} (hf : HasDerivAt f f' x) :
+    ContinuousAt f x := by
+  rw[continuous_at_iff_tends_to, tends_to_of_sub]
+  have h (g : ℝ → ℝ) (hg : g x = 0): g = (fun y => g y / (y - x)) * fun y => y - x := by
+      ext y
+      by_cases h : y = x
+      · simp only [h, hg, Pi.mul_apply, sub_self, div_zero, mul_zero]
+      simp only [Pi.mul_apply]
+      field_simp -- new tactic!
+  rw[h (f - const _ (f x)) (sub_self (f x)), ← mul_zero (f')]
+  refine tends_to_mul_tends_to hf ?_
+  exact fun ε hε => ⟨ε, hε, fun y hy hxy => by simp only [sub_zero, hxy]⟩
+
+
 lemma continuous_of_differentiable {f : ℝ → ℝ} (hf : Differentiable f) :
     ContinuousOn f := by
     obtain ⟨f', hf'⟩ := hf
-    intro x
-    rw[continuous_at_iff_tends_to, tends_to_of_sub]
-    have h (g : ℝ → ℝ) (hg : g x = 0): g = (fun y => g y / (y - x)) * fun y => y - x := by
-        ext y
-        by_cases h : y = x
-        · simp only [h, hg, Pi.mul_apply, sub_self, div_zero, mul_zero]
-        simp only [Pi.mul_apply]
-        field_simp -- new tactic!
-    rw[h (f - const _ (f x)) (sub_self (f x)), ← mul_zero (f' x)]
-    refine tends_to_mul_tends_to (fun y => (f y - f x) / (y - x)) (fun y => y - x) x
-        (f' x) 0 (hf' x) ?_
-    exact fun ε hε => ⟨ε, hε, fun y hy hxy => by simp only [sub_zero, hxy]⟩
+    exact fun x => continuous_at_of_deriv_at (hf' x)
+
+lemma deriv_add_at {f g: ℝ → ℝ} {f' g' x : ℝ} (hf : HasDerivAt f f' x) (hg : HasDerivAt g g' x) :
+  HasDerivAt (f + g) (f' + g') x := sorry
 
 lemma deriv_add {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
     HasDeriv (f + g) (deriv f + deriv g) := by
   sorry
 
+lemma deriv_mul_at {f g : ℝ → ℝ} {f' g' : ℝ} {x : ℝ} (hf : HasDerivAt f f' x) (hg : HasDerivAt g g' x) :
+    HasDerivAt (f * g) (f' * g x + f x * g') x := by
+  unfold HasDerivAt at ⊢
+  have hexpand : (fun y ↦ ((f * g) y - (f * g) x) / (y - x))
+    = (fun y => (f y - f x) / (y - x)) * const _ (g x)  + f *  (fun y => (g y - g x) / (y - x)) := by
+    ext y
+    simp only [Pi.add_apply, Pi.mul_apply, const_apply]
+    calc
+      (f y * g y - f x * g x) / (y - x) =
+          ((f y - f x) * g x + f y * (g y - g x)) / (y - x) := by ring
+      _ = (f y - f x) / (y - x) * g x +
+          f y * ((g y - g x) / (y - x)) := by ring
+  rw[hexpand]
+  apply tends_to_add_tends_to ?_ ?_
+  · exact tends_to_mul_tends_to hf (tends_to_const (g x) x)
+  refine tends_to_mul_tends_to ?_ hg
+  apply continuous_at_iff_tends_to.mp (continuous_at_of_deriv_at hf)
+
+
 lemma deriv_mul {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
-    HasDeriv (f * g) (deriv f * g  + f  * deriv g ) := by
-  sorry
+    HasDeriv (f * g) (deriv f * g  + f  * deriv g ) := fun x =>
+  deriv_mul_at (has_deriv_of_differentiable hf x) (has_deriv_of_differentiable hg x)
 
 lemma deriv_const (c : ℝ) : HasDeriv (const _ c) (const _ 0) := by
     intro x ε hε
@@ -202,7 +233,7 @@ theorem deriv_at_max_zero {f : ℝ → ℝ} {x ε : ℝ} (hε : ε > 0)
             _ < x + ε := by linarith
         simp only [one_div, sub_sub_cancel_left, Left.neg_nonpos_iff, inv_nonneg, yl]
         linarith
-    rw[← deriv_eq_of_has_deriv f f' x hf']
+    rw[← deriv_eq_of_has_deriv hf']
     linarith
   simp only [deriv, h, ↓reduceDIte]
 
