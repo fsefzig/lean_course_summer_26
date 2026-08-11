@@ -192,22 +192,18 @@ lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (v : upperBounds S) :
     induction n with
     | zero => exact hl₀
     | succ n ih =>
-      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
-      · simp only [l, Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
-        exact Set.mem_preimage.mp ih
-      have h1: (bdds (n + 1)).1 = pointAbove (((bdds n).1 + (bdds n).2)/2) h := by
-        simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
-      simp only[l,h1]
+      simp only [l, bdds]
+      split_ifs with h
+      · exact Set.mem_preimage.mp ih
       exact (pointAbove (((bdds n).1 + (bdds n).2)/2) h).2.1
   have humem : ∀ n, u n ∈ upperBounds S := by
     intro n
     induction n with
     | zero => simp only [Set.mem_setOf_eq, Nat.rec_zero, Subtype.coe_prop, u, bdds]
     | succ n ih =>
-      simp only [u]
-      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
-      · simp only [Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
-      simp only [Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
+      simp only [u, bdds]
+      split_ifs with h
+      · exact h
       exact ih
   have hneq : u₀ - l₀ > 0 := by
       simp only [gt_iff_lt, sub_pos]
@@ -220,18 +216,15 @@ lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (v : upperBounds S) :
     induction n with
     | zero => simp only [Set.mem_setOf_eq, Nat.rec_zero, pow_zero, div_one, Std.le_refl, u, bdds, l]
     | succ n ih =>
-      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
-      · have bdds_eq : bdds (n + 1) = ((bdds n).1, ((bdds n).1 + (bdds n).2)/2) := by
-          simp [bdds, h, Set.mem_setOf_eq]
-        simp only [bdds_eq, tsub_le_iff_right, ge_iff_le, u, l]
+      simp only [u, l, bdds]
+      split_ifs with h
+      · simp only [tsub_le_iff_right]
         refine (div_le_iff₀ ?_).mpr ?_
         · positivity
         calc (bdds n).1 + (bdds n).2 ≤ u n - l n + 2*(bdds n).1 := by simp [u, l]; group; linarith
         _ ≤ (↑u₀ - l₀) / 2 ^ (n) + ((bdds n).1) * 2 := by linarith [ih]
         _ = ((↑u₀ - l₀) / 2 ^ (n+1) + ((bdds n).1)) * 2 := by ring
-      have bdds_eq : bdds (n + 1) = ((pointAbove (((bdds n).1 + (bdds n).2)/2) h).val, (bdds n).2)
-        := by simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
-      simp only [bdds_eq, Set.mem_setOf_eq, tsub_le_iff_right, ge_iff_le, u, l]
+      simp only [Set.mem_setOf_eq, tsub_le_iff_right]
       calc (bdds n).2 = 1/2*(u n - l n + (((bdds n).1 + (bdds n).2))) := by simp [u, l]; ring
       _ ≤ 1/2 *((↑u₀ - l₀) / 2 ^ (n) + ((bdds n).1 + (bdds n).2)) := by linarith [ih]
       _ = (↑u₀ - l₀) / 2 ^ (n + 1) + (((bdds n).1 + (bdds n).2) / 2) := by ring
@@ -261,12 +254,9 @@ lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (v : upperBounds S) :
     have hmon : Monotone l := by
       refine monotone_nat_of_le_succ ?_
       intro n
-      by_cases h : ((bdds n).1 + (bdds n).2)/2 ∈ upperBounds S
-      · simp only [l, Set.mem_setOf_eq, h, ↓reduceDIte, bdds]
-        exact le_of_eq rfl
-      have bdds_eq : bdds (n + 1) = ((pointAbove (((bdds n).1 + (bdds n).2)/2) h).val, (bdds n).2)
-        := by simp only [Set.mem_setOf_eq, h, ↓reduceDIte, Lean.Elab.WF.paramLet, bdds]
-      simp only [l, bdds_eq, Set.mem_setOf_eq, ge_iff_le]
+      simp only [l, bdds]
+      split_ifs with h
+      · exact le_of_eq rfl
       calc (bdds n).1 ≤ (((bdds n).1 + (bdds n).1) / 2) := by simp
       _ = (((bdds n).1 + (l n)) / 2) := by rfl
       _ ≤ (((bdds n).1 + (u n)) / 2) := by
@@ -285,15 +275,13 @@ lemma exercise2 {S : Set ℝ} (hS : S.Nonempty) (v : upperBounds S) :
         simp only [sub_zero]
         exact Eq.symm (abs_of_nonneg (sub_nonneg_of_le (humem N (hlmem N))))
       _ < ε := by exact hN N (le_refl N)
-  obtain ⟨a, ha⟩ := MySequences.real_numbers_complete hCauchy
+  have ⟨a, ha⟩ := MySequences.real_numbers_complete hCauchy
   use ⟨a, ?_⟩
   · intro b
     apply tends_to_le_of_le ha
     exact fun n => b.2 (hlmem n)
   have ha' : TendsTo ⟨u⟩ a := by
-    have hadd : u = (u - l) + l := by
-      simp only [sub_add_cancel]
-    rw[hadd]
+    rw[show u = (u - l) + l by simp only [sub_add_cancel]]
     simpa only [sub_add_cancel, Pi.sub_apply, zero_add] using tends_to_add hdifflim ha
   intro s hs
   apply tends_to_ge_of_ge ha'

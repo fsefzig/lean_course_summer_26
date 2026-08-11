@@ -1,6 +1,7 @@
 import LectureNotes.lecture7.examples7
 import exercises.sheet5
 import exercises.sheet6
+import Mathlib.Analysis.Calculus.Deriv.Slope
 
 namespace MyFunctions
 
@@ -11,7 +12,6 @@ Convergence of a function `f : ℝ → ℝ` to a limit `a` at a point `x`.
 -/
 def TendsTo (f : ℝ → ℝ) (x : ℝ) (a : ℝ) : Prop :=
     ∀ ε > 0, ∃ δ > 0, ∀ y ≠ x, |y - x| < δ → |f y - a| < ε
-
 
 /-
 As you can see, there are a few sorry's in the code. Most of these results are similar to things
@@ -80,6 +80,12 @@ Assertion that `f'` is the derivative of `f` at every point `x : ℝ`
 def HasDeriv (f : ℝ → ℝ) (f' : ℝ → ℝ) : Prop :=
     ∀ x, HasDerivAt f (f' x) x
 
+lemma HasDerivAt_iff {f : ℝ → ℝ} {f' x : ℝ} :
+  HasDerivAt f f' x ↔ _root_.HasDerivAt f f' x := by
+  rw [hasDerivAt_iff_tendsto_slope, Metric.tendsto_nhdsWithin_nhds]
+  simp only [HasDerivAt, TendsTo, slope_def_field, Real.dist_eq,
+    Set.mem_compl_iff, Set.mem_singleton_iff]
+
 /-
 We define the derivate of a function to be the value `f'`
 from above if it exists, otherwise `0`.
@@ -117,7 +123,7 @@ lemma has_deriv_of_differentiable {f : ℝ → ℝ} (hf : Differentiable f) :
     rw[← deriv_of_has_deriv hf']
     exact hf'
 
-lemma continuous_at_of_deriv_at {f: ℝ → ℝ} {f' x : ℝ} (hf : HasDerivAt f f' x) :
+lemma continuous_at_of_deriv_at {f : ℝ → ℝ} {f' x : ℝ} (hf : HasDerivAt f f' x) :
     ContinuousAt f x := by
   rw[continuous_at_iff_tends_to, tends_to_of_sub]
   have h (g : ℝ → ℝ) (hg : g x = 0): g = (fun y => g y / (y - x)) * fun y => y - x := by
@@ -135,6 +141,9 @@ lemma continuous_of_differentiable {f : ℝ → ℝ} (hf : Differentiable f) :
     ContinuousOn f := by
     obtain ⟨f', hf'⟩ := hf
     exact fun x => continuous_at_of_deriv_at (hf' x)
+
+lemma deriv_add_at {f g: ℝ → ℝ} {f' g' x : ℝ} (hf : HasDerivAt f f' x) (hg : HasDerivAt g g' x) :
+  HasDerivAt (f + g) (f' + g') x := sorry
 
 lemma deriv_add {f g : ℝ → ℝ} (hf : Differentiable f) (hg : Differentiable g) :
     HasDeriv (f + g) (deriv f + deriv g) := by
