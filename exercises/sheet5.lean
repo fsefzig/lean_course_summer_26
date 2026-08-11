@@ -1,0 +1,100 @@
+import LectureNotes.lecture6.examples6
+
+open MySequences
+
+
+/-
+Hint: Use the above fact about the ceiling of a real number to find a rational number between 0 and ε.
+Find a useful theorem below.
+-/
+
+example (x : ℝ) : ⌈x⌉ ≥ x := by exact Int.le_ceil x
+
+#check one_div_le
+
+theorem nat_one_div_le {ε : ℝ} (hε : ε > 0) : ∃ δ : ℕ , δ > 0 ∧ (1 / δ) ≤ ε := by
+  by_cases h : ε ≤ 1
+  · use ⌈1 / ε⌉.toNat
+    refine ⟨Nat.ceil_pos.mpr (show 0 < ⌈1 / ε⌉ by positivity), ?_⟩
+    apply (one_div_le _ _).mpr
+    · have h : (⌈1 / ε⌉.toNat : ℝ) = ⌈1 / ε⌉ := by
+        exact_mod_cast Int.toNat_of_nonneg (by positivity)
+      rw[h]
+      exact Int.le_ceil (1 / ε)
+    · apply Nat.cast_pos'.mpr
+      exact Nat.ceil_pos.mpr (show 0 < ⌈1 / ε⌉ by positivity)
+    exact hε
+  use 1
+  exact ⟨by positivity, by linarith⟩
+
+/-
+Show that convergence can be expressed in terms of rational numbers. Use the above exercise.
+-/
+theorem exericse2 {x : RealSeq} (a : ℝ) (hx : ∀ δ : ℕ, δ > 0 → ∃ N, ∀ n≥ N, dist (x n) a < 1 / δ)
+  : TendsTo x a := by
+  intro ε hε
+  obtain ⟨δ, hδ, h⟩ := nat_one_div_le hε
+  obtain ⟨N, hN⟩ := hx δ hδ
+  use N
+  intro n hn
+  linarith [hN n hn]
+
+
+/-
+Show that rational Cauchy sequences are also Cauchy sequences of real numbers and vice versa.
+Hint below:
+-/
+#check Rat.dist_cast
+
+theorem exercise3 {x : RatSeq} : IsCauchy x ↔ IsCauchyReal x := by
+  constructor
+  · intro h ε hε
+    obtain ⟨N, hN⟩ := h ε hε
+    use N
+    simp only [ge_iff_le, Rat.dist_cast]
+    exact hN
+  intro h ε hε
+  obtain ⟨N, hN⟩ := h ε hε
+  use N
+  simp only [ge_iff_le, Rat.dist_cast] at hN
+  exact hN
+
+/-
+Finally, show that convergent sequences are Cauchy sequences.
+-/
+theorem exercise4 {x : RealSeq} (a : ℝ) (hx : TendsTo x a) : IsCauchyReal x := by
+  intro ε hε
+  obtain ⟨N, hN⟩ := hx (ε / 2) (by positivity)
+  use N
+  intro m hm n hn
+  calc
+    dist (x m) (x n) ≤ dist (x m) a + dist a (x n) := dist_triangle (x m) a (x n)
+    _ = dist (x m) a + dist (x n) a := by rw[dist_comm a (x n)]
+    _ < ε / 2 + ε / 2 := by exact add_lt_add (hN m hm) (hN n hn)
+    _ = ε := by exact add_halves ε
+
+/-
+Finally, define a sequence of real numbers that does not converge.
+-/
+
+def my_diverging_sequence : RealSeq where
+  x n := (-1 : ℝ) ^ n
+
+theorem exercise5 : ¬ ∃ a : ℝ, TendsTo my_diverging_sequence a := by
+  let x := my_diverging_sequence
+  intro ⟨a, ha⟩
+  obtain ⟨N, hN⟩ := ha 1 Real.zero_lt_one
+  have hcon :  dist (x N) (x (N+1)) = 2 := by
+    calc
+      dist (x N) (x (N+1)) = abs ((-1 : ℝ) ^ N - (-1 : ℝ) ^ (N + 1)) := by rfl
+      _ = abs ((-1 : ℝ) ^ N * 2) := by ring_nf
+      _ = 1 * 2 := by simp only [abs_mul, abs_pow, abs_neg, abs_one, one_pow, Nat.abs_ofNat,
+        one_mul]
+      _ = 2 := by exact one_mul 2
+  have hdist : dist (x N) (x (N + 1)) < 2 := by
+    calc
+      dist (x N) (x (N + 1)) ≤ dist (x N) a + dist a (x (N + 1)) := dist_triangle (x N) a (x (N + 1))
+      _ = dist (x N) a + dist (x (N + 1)) a := by rw[dist_comm a (x (N + 1))]
+      _ < 1 + 1 := by exact add_lt_add (hN N (by linarith)) (hN (N + 1) (by linarith))
+      _ = 2 := by exact one_add_one_eq_two
+  linarith
