@@ -2,6 +2,7 @@
 /-
 Definitions:
 1.) Pi
+2.) Sine and Cosine
 
 Theorems/Results:
 
