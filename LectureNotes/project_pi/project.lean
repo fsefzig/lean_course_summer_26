@@ -13,8 +13,7 @@ Unknown results:
 
 Proof Structure
   Step 1: Define the functions f, F.
-  Stem 2: ...
-
+  Step 2: Compute derivative of F.
 
 
 
