@@ -1,6 +1,5 @@
 
 /-
-change!!
 Definitions:
 1.) Pi
 2.) Sin
@@ -69,11 +68,14 @@ import LectureNotes.lecture8.examples8
 import LectureNotes.lecture9.examples9
 import Mathlib.Analysis.BoxIntegral.Basic
 import Mathlib.Analysis.BoxIntegral.Partition.Tagged
-
+import Mathlib.Algebra.Polynomial.SumIteratedDerivative
+import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 
 open BoxIntegral MyFunctions
 open scoped BigOperators
 open Real
+open scoped ContDiff
 
 #check sin
 #check cos
@@ -113,14 +115,15 @@ theorem integral_of_differentiable_Interval {f : ℝ → ℝ} {a b : ℝ}
     HasIntegral (MyFunctions.deriv f) hab (f b - f a) := by
   sorry
 
-lemma integral_monotone {f g : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hfg: ∀ x ∈ Set.Icc a b, f x < g x)
+lemma integral_monotone {f g : ℝ → ℝ} {a b : ℝ} (hab : a < b) (hfg : ∀ x ∈ Set.Icc a b, f x < g x)
     (hf : Integrable f hab) (hg : Integrable g hab) :
     ∀ {If Ig : ℝ}, HasIntegral f hab If → HasIntegral g hab Ig → If < Ig := by
   sorry
 
 lemma poly_infty_differentiable (p : Polynomial ℝ) :
     ContDiff ℝ ∞ (fun x : ℝ => p.eval x) := by
-  exact p.analytic.contDiff
+    sorry
+  --exact p.analytic.contDiff -It's giving me issues
 
 theorem iven_niven_pi {a b : ℕ+} (hab : b < a) : ¬(pi = (a : ℝ)/(b : ℝ)) := by
     by_contra h
@@ -132,3 +135,44 @@ theorem iven_niven_pi {a b : ℕ+} (hab : b < a) : ¬(pi = (a : ℝ)/(b : ℝ)) 
       fun k => (Polynomial.derivative^[k]) f
     let F : Polynomial ℝ :=
       Finset.sum (Finset.range (n + 1)) (fun k => (-1 : ℝ) ^ k • D (2 * k))
+    -- helper polynomial for step 5
+    let P : Polynomial ℤ := Polynomial.X ^ n *
+      (Polynomial.C ((a : ℕ) : ℤ) -
+        Polynomial.C ((b : ℕ) : ℤ) * Polynomial.X) ^ n
+    have hfP : f = --step 5
+      (P.map (Int.castRingHom ℝ)) *
+        Polynomial.C ((Nat.factorial n : ℝ)⁻¹) := by
+        dsimp [f, P]
+        simp only [Polynomial.map_mul,
+        Polynomial.map_pow,
+        Polynomial.map_sub,
+        Polynomial.map_C,
+        Polynomial.map_X]
+        norm_num
+    have hF_smooth : ContDiff ℝ ∞ (fun x : ℝ => F.eval x) := by --step 6
+       exact poly_infty_differentiable F
+    let g : ℝ → ℝ := fun x => --step 7
+    (Polynomial.derivative F).eval x * sin x - F.eval x * cos x
+    have hg_deriv (x : ℝ) : --step 8
+      MyFunctions.HasDerivAt g (((Polynomial.derivative^[2]) F).eval x * sin x + F.eval x * sin x) x := by
+      dsimp [g]
+      convert
+        ((Polynomial.hasDerivAt (Polynomial.derivative F) x).mul
+          (hasDerivAt_sin x)).sub -- Mathlib definition of HasDerivAt. Defines derivatices for sin & cos.
+        ((Polynomial.hasDerivAt F x).mul
+          (hasDerivAt_cos x))
+        using 1 <;> ring
+    have hg_deriv_eq (x : ℝ) : MyFunctions.deriv g x = (((Polynomial.derivative^[2]) F).eval x + F.eval x) * sin x := by
+      rw [← MyFunctions.deriv_eq_of_has_deriv (hg_deriv x)]
+      ring
+    have g_deriv_eq_fsin (x : ℝ) : MyFunctions.deriv g x = f.eval x * sin x := by --step 9
+      rw [hg_deriv_eq]
+      dsimp [f]
+      ring_nf
+    have h0pi : (0 : ℝ) < pi := by --step 10
+      sorry
+    have hIntegrable : Integrable (fun x => f.eval x * Real.sin x) h0pi := by
+      sorry
+    obtain ⟨I, hI⟩ := hIntegrable
+    have hI_eval : I = F.eval pi + F.eval 0 := by --step 11
+      sorry
