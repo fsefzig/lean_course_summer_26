@@ -102,3 +102,45 @@ theorem roots_of_unity_exhaustive {n : ℕ} (z : ℂ) (hn : n ≠ 0) :
   simp only [mod_eq_sub_int, exp_sub, exp_int_mul_two_pi_mul_I, div_one]
   rw[mul_assoc, mul_comm (b : ℂ) (2 * π)] at hexp
   exact hexp.symm
+
+lemma exists_cosine {a : ℝ} (ha : -1 ≤ a ∧ a ≤ 1) :
+  ∃ θ : ℝ, θ ∈ Set.Icc 0 Real.pi ∧ Real.cos θ = a := by
+  obtain hivt := intermediate_value_Icc' Real.pi_nonneg Real.continuous_cos.continuousOn
+  rw[Real.cos_pi, Real.cos_zero] at hivt
+  obtain ⟨θ, hθ, hcosθ⟩ := hivt (Set.mem_Icc.mpr ha)
+  use θ
+
+theorem exp_surj_unit_circle (z : ℂ) (hz : ‖z‖ = 1) :
+    ∃ θ : ℝ, exp (θ * I) = z := by
+  obtain ⟨a, b⟩ := z
+  have hab : a ^ 2 + b ^ 2 = 1 := by
+    simp only [norm, normSq_mk, Real.sqrt_eq_one] at hz
+    linarith
+  have ha : -1 ≤ a ∧ a ≤ 1 := abs_le_of_sq_le_sq' (by linarith [sq_nonneg b]) (by linarith)
+  obtain ⟨θ, ⟨hθ, hcosθ⟩⟩ := exists_cosine ha
+  have hsin : Real.sin θ = b ∨ Real.sin θ = -b := by
+    have identity : Real.sin θ ^ 2 = 1 - Real.cos θ ^ 2 := Real.sin_sq θ
+    rw[hcosθ, sub_eq_of_eq_add' hab.symm] at identity
+    exact sq_eq_sq_iff_eq_or_eq_neg.mp identity
+  by_cases hb : b ≥ 0
+  · have hsinθ : Real.sin θ = b := by
+      rcases hsin with h1 | h2
+      · exact h1
+      · linarith [Real.sin_nonneg_of_mem_Icc hθ]
+    obtain eulers := eulers_theorem θ
+    rw[(ofReal_cos θ).symm, (ofReal_sin θ).symm, hcosθ, hsinθ] at eulers
+    use θ
+    rw[eulers]
+    apply Complex.ext <;> simp
+  · have hsinθ : Real.sin θ = -b := by
+      rcases hsin with h1 | h2
+      · linarith [Real.sin_nonneg_of_mem_Icc hθ]
+      · exact h2
+    obtain eulers := eulers_theorem (-θ)
+    push_cast at eulers
+    rw[cos_neg ↑θ, sin_neg ↑θ, (ofReal_cos θ).symm, (ofReal_sin θ).symm, hcosθ, hsinθ] at eulers
+    use -θ
+    push_cast
+    rw[eulers]
+    simp only [ofReal_neg, neg_neg]
+    apply Complex.ext <;> simp
